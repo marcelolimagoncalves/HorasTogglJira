@@ -1,0 +1,11 @@
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\TogglJiraConsole.exe.config
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\TogglJiraConsole.exe
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\TogglJiraConsole.pdb
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\Newtonsoft.Json.dll
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\System.Net.Http.Formatting.dll
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\Newtonsoft.Json.xml
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\bin\Release\System.Net.Http.Formatting.xml
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.csprojResolveAssemblyReference.cache
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.csproj.CoreCompileInputs.cache
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.exe
+C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.pdb

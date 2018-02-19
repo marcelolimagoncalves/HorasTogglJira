@@ -54,6 +54,7 @@
     <Compile Include="InfoWorklog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TagsPendente.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserToggl.cs" />
     <Compile Include="WorklogPost.cs" />
@@ -64,6 +65,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TagsPendente.xml" />
     <Content Include="Users.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

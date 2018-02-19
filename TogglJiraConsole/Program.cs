@@ -78,6 +78,8 @@ namespace TogglJiraConsole
                     var email = retUserToggl.data.email;
                     var default_wid = retUserToggl.data.default_wid;
 
+                    var tagsPendentes = await GetTagsPendente();
+
                     Thread.Sleep(1000);
 
                     URI = String.Format("{0}/api/v8/workspaces/{1}/tags", UrlBaseToggl, default_wid);
@@ -86,9 +88,10 @@ namespace TogglJiraConsole
                     string xidTagsPendente = string.Empty;
                     if (retWorkspaceTags.Count > 0)
                     {
-                        var idTagsPendente = retWorkspaceTags.Where(i => i.name == "_Pendente")
+                        //var idTagsPendente = retWorkspaceTags.Where(i => i.name == "_Pendente")
+                        var idTagsPendente = retWorkspaceTags.Where(i => tagsPendentes.Tag.Contains(i.name.ToUpper()))
                             .Select(i => i.id).ToArray();
-                        xidTagsPendente = String.Join(", ", idTagsPendente);
+                        xidTagsPendente = String.Join(",", idTagsPendente);
                     }
 
                     Thread.Sleep(1000);
@@ -151,10 +154,13 @@ namespace TogglJiraConsole
                     }
                     if (response.IsSuccessStatusCode)
                     {
+                        var tagsPendentes = await GetTagsPendente();
+
                         //Toggl
                         var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
-                        var t = infoWorklog.tags.Where(i => i.ToString() != "_Pendente").ToArray();
-                        var xTags = String.Join(", ", t);
+                        //var t = infoWorklog.tags.Where(i => i.ToString() != "_Pendente").ToArray();
+                        var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
+                        var xTags = String.Join(",", t);
                         var paramToggl = new { time_entry = new { tags = t } };
                         var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
                         var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
@@ -199,6 +205,34 @@ namespace TogglJiraConsole
 
                 Console.WriteLine("Algum erro aconteceu na leitura dos usuarios: " + ex.Message);
                 return new Users();
+            }
+
+        }
+
+        static async Task<TagsPendente> GetTagsPendente()
+        {
+            try
+            {
+                string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+                caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                caminhoArquivo += @"\TagsPendente.xml";
+
+                XmlSerializer ser = new XmlSerializer(typeof(TagsPendente));
+                TextReader textReader = (TextReader)new StreamReader(caminhoArquivo);
+                XmlTextReader reader = new XmlTextReader(textReader);
+                reader.Read();
+
+                TagsPendente tags = (TagsPendente)ser.Deserialize(reader);
+
+                tags.Tag = tags.Tag.ConvertAll(d => d.ToUpper());
+
+                return tags;
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine("Algum erro aconteceu na leitura das tags pendentes: " + ex.Message);
+                return new TagsPendente();
             }
 
         }
