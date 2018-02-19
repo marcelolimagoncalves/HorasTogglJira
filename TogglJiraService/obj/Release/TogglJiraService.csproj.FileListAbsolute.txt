@@ -10,3 +10,16 @@ C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\obj\R
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\obj\Release\TogglJiraService.csproj.CoreCompileInputs.cache
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\obj\Release\TogglJiraService.exe
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\obj\Release\TogglJiraService.pdb
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.exe.config
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.exe
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.pdb
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\Newtonsoft.Json.dll
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\System.Net.Http.Formatting.dll
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\Newtonsoft.Json.xml
+E:\VS2017\windowsservicetoggljira\TogglJiraService\bin\Release\System.Net.Http.Formatting.xml
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csprojResolveAssemblyReference.cache
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.ProjectInstaller.resources
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csproj.GenerateResource.Cache
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csproj.CoreCompileInputs.cache
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.exe
+E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.pdb

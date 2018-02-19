@@ -12,15 +12,22 @@ namespace TogglJiraService
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
 #if (!DEBUG)
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
-			{
-				new Service1()
-			};
+            {
+                        new Service1()
+            };
             ServiceBase.Run(ServicesToRun);
+
+            /* verifica se está no modo interativo, para receber parâmetros de instalação e desinstalação do serviço */
+            //if (Environment.UserInteractive)
+            //{
+            //    ProgramArgs.Parse(args);
+            //}
+
 #else
             // Debug code: Permite debugar um código sem se passar por um Windows Service.
             // Defina qual método deseja chamar no inicio do Debug (ex. MetodoRealizaFuncao)

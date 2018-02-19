@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="DetailedReport.cs" />
     <Compile Include="InfoWorklog.cs" />
+    <Compile Include="ProgramArgs.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
