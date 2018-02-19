@@ -56,3 +56,45 @@ Parâmetros afetados são:
    logtoconsole = 
    logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
    assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Desinstalando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Removendo a origem do EventLog Toggl Jira Integracao.
+Serviço Toggl Jira Integracao está sendo removido do sistema...
+Serviço Toggl Jira Integracao foi removido com êxito do sistema.
+Instalando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Instalando o serviço Toggl Jira Integracao...
+Serviço Toggl Jira Integracao foi instalado com êxito.
+Criando a origem de EventLog Toggl Jira Integracao no log Application...
+Confirmando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Desinstalando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Removendo a origem do EventLog Toggl Jira Integracao.
+Serviço Toggl Jira Integracao está sendo removido do sistema...
+Serviço Toggl Jira Integracao foi removido com êxito do sistema.
+Instalando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
+Instalando o serviço Toggl Jira Integracao...
+Serviço Toggl Jira Integracao foi instalado com êxito.
+Criando a origem de EventLog Toggl Jira Integracao no log Application...
+Confirmando o assembly 'C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe'.
+Parâmetros afetados são:
+   logtoconsole = 
+   logfile = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.InstallLog
+   assemblypath = C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraService\bin\Release\TogglJiraService.exe
