@@ -23,12 +23,16 @@ UsePreviousAppDir=no
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 
 [Files]
-Source: "..\TogglJiraService\bin\Release\TogglJiraService.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\TogglJiraService\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
-Source: "..\TogglJiraService\*.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TogglJiraConsole\bin\Release\TogglJiraConsole.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TogglJiraConsole\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "..\TogglJiraConsole\bin\Release\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "..\TogglJiraConsole\install.bat"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "..\TogglJiraConsole\uninstall.bat"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "..\TogglJiraConsole\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "..\TogglJiraConsole\*.config"; DestDir: "{app}"; Flags: ignoreversion
 
 [Run]
-Filename: "{app}\TogglJiraService.exe"; Parameters: "--install"
+Filename: "{app}\install.bat";
 
 [UninstallRun]
-Filename: "{app}\TogglJiraService.exe"; Parameters: "--uninstall"
+Filename: "{app}\uninstall.bat";

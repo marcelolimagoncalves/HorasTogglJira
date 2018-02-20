@@ -1,0 +1,1 @@
+TogglJiraConsole.exe install

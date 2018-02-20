@@ -9,3 +9,16 @@ C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\R
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.csproj.CoreCompileInputs.cache
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.exe
 C:\Marcelo\VS2017\IntegracaoTogglJira\IntegracaoTogglJira\TogglJiraConsole\obj\Release\TogglJiraConsole.pdb
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\TogglJiraConsole.exe.config
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\TogglJiraConsole.exe
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\TogglJiraConsole.pdb
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\Newtonsoft.Json.dll
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\System.Net.Http.Formatting.dll
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\Topshelf.dll
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\Newtonsoft.Json.xml
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\System.Net.Http.Formatting.xml
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\bin\Release\Topshelf.xml
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\obj\Release\TogglJiraConsole.csprojResolveAssemblyReference.cache
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\obj\Release\TogglJiraConsole.csproj.CoreCompileInputs.cache
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\obj\Release\TogglJiraConsole.exe
+E:\VS2017\windowsservicetoggljira\TogglJiraConsole\obj\Release\TogglJiraConsole.pdb
