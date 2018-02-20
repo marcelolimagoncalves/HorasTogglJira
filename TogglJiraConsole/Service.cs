@@ -1,6 +1,8 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -15,6 +17,11 @@ namespace TogglJiraConsole
 {
     public class Service
     {
+        /// <summary>
+        /// Instância para registro de logs.
+        /// </summary>
+        private static Logger Log = LogManager.GetCurrentClassLogger();
+
         private System.Timers.Timer _timer;
 
         public Service()
@@ -25,28 +32,34 @@ namespace TogglJiraConsole
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            var data = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: 00, minute: 02, second: 00);
-            if (DateTime.Now.ToString("dd/MM/yyyy HH:mm") == data.ToString("dd/MM/yyyy HH:mm"))
+            var TimeStarterRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeStarterRun"], "HH:mm", CultureInfo.InvariantCulture);
+            var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
+            var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour, 
+                minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
+            if (DateTime.Now.ToString("dd/MM/yyyy HH:mm") == dataInicio.ToString("dd/MM/yyyy HH:mm"))
             {
-                Console.WriteLine("passou");
                 RunAsync().GetAwaiter().GetResult();
             }
+            //RunAsync().GetAwaiter().GetResult();
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
         static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
         static async Task RunAsync()
         {
-
+            var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
+            var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
+                minute: TimeEndRun.Minute, second: TimeEndRun.Second);
             try
             {
-                Console.WriteLine("Iniciando a sincronizacao");
+                Log.Debug("Iniciando a sincronizacao");
                 var usuarios = await GetUsuarios();
                 if (usuarios.User.Count() > 0)
                 {
                     foreach (var usu in usuarios.User)
                     {
-                        Console.WriteLine("Iniciando a sincronizacao do usuario: " + usu.XNome);
+                        Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
+                        Log.Info("Iniciando a sincronizacao");
                         var toggl = await GetToggl(user: usu);
                         if (toggl.Count() > 0)
                         {
@@ -54,16 +67,20 @@ namespace TogglJiraConsole
                             {
                                 var iJira = await PostJira(user: usu, infoWorklog: t);
                             }
-                            Console.WriteLine("A sincronizacao do usuario: " + usu.XNome + " ocorreu com sucesso");
                         }
-
+                        Log.Info("Fim da sincronizacao");
+                        if(DateTime.Now >= dataFim)
+                        {
+                            Log.Info("Sincronização finalizada pois atingiu o tempo limite.");
+                            break;
+                        }
                     }
                 }
-                Console.WriteLine("Fim da sincronizacao");
+                Log.Debug("Fim da sincronizacao");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Log.Error(ex, String.Format("Ocorreram erro(s): {0}", ex.ToString()));
             }
 
             Console.ReadLine();
@@ -107,7 +124,12 @@ namespace TogglJiraConsole
 
                     var since = DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd");
                     var until = DateTime.Now.ToString("yyyy-MM-dd");
-
+                    if(!string.IsNullOrEmpty(since) && !string.IsNullOrEmpty(until))
+                    {
+                        since = ConfigurationManager.AppSettings["since"];
+                        until = ConfigurationManager.AppSettings["until"];
+                    }
+                    
                     URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}",
                         UrlBaseToggl, email, default_wid, xidTagsPendente, since, until);
                     result = await client.GetAsync(URI);
@@ -133,7 +155,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Algum erro aconteceu no GetToggl: " + ex.Message);
+                Log.Error(ex, String.Format("Algum erro aconteceu no GetToggl: {0}", ex.ToString()));
                 return new List<InfoWorklog>();
             }
 
@@ -161,6 +183,7 @@ namespace TogglJiraConsole
                         response = await client.PutAsJsonAsync(URI, paramPut);
                         returnValue = await response.Content.ReadAsAsync<WorklogPost>();
                     }
+                    Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
                     if (response.IsSuccessStatusCode)
                     {
                         var tagsPendentes = await GetTagsPendente();
@@ -185,7 +208,7 @@ namespace TogglJiraConsole
             catch (Exception ex)
             {
 
-                Console.WriteLine("Algum erro aconteceu no PostJira/UpdateTagsToggl: " + ex.Message);
+                Log.Error(ex, String.Format("Algum erro aconteceu no PostJira/UpdateTagsToggl: {0}", ex.ToString()));
                 return 0;
 
             }
@@ -212,7 +235,7 @@ namespace TogglJiraConsole
             catch (Exception ex)
             {
 
-                Console.WriteLine("Algum erro aconteceu na leitura dos usuarios: " + ex.Message);
+                Log.Error(ex, String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.ToString()));
                 return new Users();
             }
 
@@ -239,8 +262,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine("Algum erro aconteceu na leitura das tags pendentes: " + ex.Message);
+                Log.Error(ex, String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.ToString()));
                 return new TagsPendente();
             }
 
