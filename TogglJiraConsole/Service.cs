@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -27,26 +28,48 @@ namespace TogglJiraConsole
         public Service()
         {
             _timer = new System.Timers.Timer(60000);
+            //_timer = new System.Timers.Timer(10000);
             _timer.Elapsed += timer_Elapsed;
         }
 
+        static DateTime TimeStarterRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeStarterRun"], "HH:mm", CultureInfo.InvariantCulture);
+        static DateTime TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            var TimeStarterRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeStarterRun"], "HH:mm", CultureInfo.InvariantCulture);
-            var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
-            var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour, 
+        {       
+            //EventLog.WriteEntry(sSource, sEvent,EventLogEntryType.Warning);
+
+            
+            var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
-            if (DateTime.Now.ToString("dd/MM/yyyy HH:mm") == dataInicio.ToString("dd/MM/yyyy HH:mm"))
-            {
-                RunAsync().GetAwaiter().GetResult();
-            }
-            //RunAsync().GetAwaiter().GetResult();
+
+
+            var sSource = "dotNET Sample App";
+            var sLog = "Application";
+            var sEvent = $"{DateTime.Now.ToString("dd/MM/yyyy HH:mm")} == {dataInicio.ToString("dd/MM/yyyy HH:mm")}";
+            if (!EventLog.SourceExists(sSource))
+                EventLog.CreateEventSource(sSource, sLog);
+            EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
+
+            //if (DateTime.Now.ToString("dd/MM/yyyy HH:mm") == dataInicio.ToString("dd/MM/yyyy HH:mm"))
+            //{
+            //    EventLog.WriteEntry(sSource, "Sim é igual!!!", EventLogEntryType.Warning);
+            //    RunAsync().GetAwaiter().GetResult();
+            //}
+            RunAsync().GetAwaiter().GetResult();
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
         static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
         static async Task RunAsync()
         {
+
+            var sSource = "dotNET Sample App";
+            var sLog = "Application";
+            var sEvent = $"RunAsync()";
+            if (!EventLog.SourceExists(sSource))
+                EventLog.CreateEventSource(sSource, sLog);
+            EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
+
             var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
             var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
                 minute: TimeEndRun.Minute, second: TimeEndRun.Second);
@@ -58,6 +81,11 @@ namespace TogglJiraConsole
                 {
                     foreach (var usu in usuarios.User)
                     {
+                        if (DateTime.Now >= dataFim)
+                        {
+                            Log.Info("A Sincronização foi finalizada porque atingiu o tempo limite.");
+                            break;
+                        }
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
                         Log.Info("Iniciando a sincronizacao");
                         var toggl = await GetToggl(user: usu);
@@ -69,11 +97,7 @@ namespace TogglJiraConsole
                             }
                         }
                         Log.Info("Fim da sincronizacao");
-                        if(DateTime.Now >= dataFim)
-                        {
-                            Log.Info("Sincronização finalizada pois atingiu o tempo limite.");
-                            break;
-                        }
+                        
                     }
                 }
                 Log.Debug("Fim da sincronizacao");
@@ -124,7 +148,7 @@ namespace TogglJiraConsole
 
                     var since = DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd");
                     var until = DateTime.Now.ToString("yyyy-MM-dd");
-                    if(!string.IsNullOrEmpty(since) && !string.IsNullOrEmpty(until))
+                    if(!string.IsNullOrEmpty(ConfigurationManager.AppSettings["since"]) && !string.IsNullOrEmpty(ConfigurationManager.AppSettings["until"]))
                     {
                         since = ConfigurationManager.AppSettings["since"];
                         until = ConfigurationManager.AppSettings["until"];

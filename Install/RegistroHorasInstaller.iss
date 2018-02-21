@@ -24,12 +24,14 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 
 [Files]
 Source: "..\TogglJiraConsole\bin\Release\TogglJiraConsole.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TogglJiraConsole\bin\Release\TogglJiraConsole.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\TogglJiraConsole\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\bin\Release\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\install.bat"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\uninstall.bat"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\*.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TogglJiraConsole\*.xsd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Run]
 Filename: "{app}\install.bat";

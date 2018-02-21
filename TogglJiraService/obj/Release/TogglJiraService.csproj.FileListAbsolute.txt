@@ -23,3 +23,15 @@ E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.
 E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csproj.CoreCompileInputs.cache
 E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.exe
 E:\VS2017\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.pdb
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.exe.config
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.exe
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\TogglJiraService.pdb
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\Newtonsoft.Json.dll
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\System.Net.Http.Formatting.dll
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\Newtonsoft.Json.xml
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\bin\Release\System.Net.Http.Formatting.xml
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.ProjectInstaller.resources
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csproj.GenerateResource.Cache
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.csproj.CoreCompileInputs.cache
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.exe
+C:\Marcelo\VS2017\IntegracaoTogglJira\windowsservicetoggljira\TogglJiraService\obj\Release\TogglJiraService.pdb
