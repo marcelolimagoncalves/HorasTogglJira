@@ -36,43 +36,49 @@ namespace TogglJiraConsole
         static DateTime TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {       
-            //EventLog.WriteEntry(sSource, sEvent,EventLogEntryType.Warning);
-
-            
+                       
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 
-
-            var sSource = "dotNET Sample App";
+            //Cria um evento no Visualisador de Eventos do Windows 
+            var sSource = "TogglJira";
             var sLog = "Application";
             var sEvent = $"{DateTime.Now.ToString("dd/MM/yyyy HH:mm")} == {dataInicio.ToString("dd/MM/yyyy HH:mm")}";
             if (!EventLog.SourceExists(sSource))
                 EventLog.CreateEventSource(sSource, sLog);
             EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
 
-            //if (DateTime.Now.ToString("dd/MM/yyyy HH:mm") == dataInicio.ToString("dd/MM/yyyy HH:mm"))
-            //{
-            //    EventLog.WriteEntry(sSource, "Sim é igual!!!", EventLogEntryType.Warning);
-            //    RunAsync().GetAwaiter().GetResult();
-            //}
-            RunAsync().GetAwaiter().GetResult();
+            bool rodou = false;
+
+            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            {
+                //Cria um evento no Visualisador de Eventos do Windows 
+                //EventLog.WriteEntry(sSource, "Sim é igual!!!", EventLogEntryType.Warning);
+                if ( !rodou)
+                {
+                    rodou = true;
+                    RunAsync().GetAwaiter().GetResult();
+                }
+            }
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
         static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
         static async Task RunAsync()
         {
-
-            var sSource = "dotNET Sample App";
-            var sLog = "Application";
-            var sEvent = $"RunAsync()";
-            if (!EventLog.SourceExists(sSource))
-                EventLog.CreateEventSource(sSource, sLog);
-            EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
+            //Cria um evento no Visualisador de Eventos do Windows 
+            //var sSource = "dotNET Sample App";
+            //var sLog = "Application";
+            //var sEvent = $"RunAsync()";
+            //if (!EventLog.SourceExists(sSource))
+            //    EventLog.CreateEventSource(sSource, sLog);
+            //EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
 
             var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
             var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
                 minute: TimeEndRun.Minute, second: TimeEndRun.Second);
+
+            bool parar = false;
             try
             {
                 Log.Debug("Iniciando a sincronizacao");
@@ -81,11 +87,11 @@ namespace TogglJiraConsole
                 {
                     foreach (var usu in usuarios.User)
                     {
-                        if (DateTime.Now >= dataFim)
+                        if (parar)
                         {
-                            Log.Info("A Sincronização foi finalizada porque atingiu o tempo limite.");
                             break;
                         }
+
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
                         Log.Info("Iniciando a sincronizacao");
                         var toggl = await GetToggl(user: usu);
@@ -93,6 +99,13 @@ namespace TogglJiraConsole
                         {
                             foreach (var t in toggl)
                             {
+                                if (DateTime.Now >= dataFim)
+                                {
+                                    Log.Info("A Sincronização foi finalizada porque atingiu o tempo limite.");
+                                    parar = true;
+                                    break;
+                                }
+
                                 var iJira = await PostJira(user: usu, infoWorklog: t);
                             }
                         }
@@ -197,35 +210,42 @@ namespace TogglJiraConsole
                     var token = user.xTokenJira;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                     HttpResponseMessage response = await client.PostAsJsonAsync(URI, param);
-                    var returnValue = await response.Content.ReadAsAsync<WorklogPost>();
-                    if (returnValue.started != infoWorklog.dtStarted)
-                    {
-                        URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, returnValue.id);
-                        var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
-                        startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
-                        var paramPut = new { started = startedAux };
-                        response = await client.PutAsJsonAsync(URI, paramPut);
-                        returnValue = await response.Content.ReadAsAsync<WorklogPost>();
-                    }
-                    Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
                     if (response.IsSuccessStatusCode)
                     {
-                        var tagsPendentes = await GetTagsPendente();
+                        var returnValue = await response.Content.ReadAsAsync<WorklogPost>();
+                        if (returnValue.started != infoWorklog.dtStarted)
+                        {
+                            URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, returnValue.id);
+                            var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
+                            startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
+                            var paramPut = new { started = startedAux };
+                            response = await client.PutAsJsonAsync(URI, paramPut);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                returnValue = await response.Content.ReadAsAsync<WorklogPost>();
+                            }  
+                        }
+                        Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var tagsPendentes = await GetTagsPendente();
 
-                        //Toggl
-                        var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
-                        //var t = infoWorklog.tags.Where(i => i.ToString() != "_Pendente").ToArray();
-                        var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
-                        var xTags = String.Join(",", t);
-                        var paramToggl = new { time_entry = new { tags = t } };
-                        var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
-                        var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
-                        var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
-                        HttpResponseMessage responseToggl = await client.PutAsJsonAsync(URIToggl, paramToggl);
+                            //Toggl
+                            var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
+                            //var t = infoWorklog.tags.Where(i => i.ToString() != "_Pendente").ToArray();
+                            var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
+                            var xTags = String.Join(",", t);
+                            var paramToggl = new { time_entry = new { tags = t } };
+                            var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
+                            var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
+                            var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
+                            HttpResponseMessage responseToggl = await client.PutAsJsonAsync(URIToggl, paramToggl);
 
-                        Thread.Sleep(1000);
+                            Thread.Sleep(1000);
+                        }
                     }
+                    
                 }
                 return 1;
             }
