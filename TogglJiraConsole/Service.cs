@@ -37,25 +37,21 @@ namespace TogglJiraConsole
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             _timer.Interval = 60000;
-            Log.Debug("Passou aqui");
 
-            // ... Input string.
-            string input = "avd-332";
-
-            // ... One or more digits.
-            //Match m = Regex.Match(input.ToLower(), @"[a-z0-9\-\0-9]");
-            Match m = Regex.Match(input.ToLower(), @"[a-zA-Z_0-9]\-[1-9]{4}$");
-
-            // ... Write value.
-            Console.WriteLine(m.Value);
-
-            //var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
-            //    minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
-
-            //if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            //string input = "Relatorio Movimento diário por linha não mostra coluna -Poupa Fila e não soma ao total transportado";
+            //Match m = Regex.Match(input.ToLower(), @"(\w+)\-\d{1,4}");
+            //if (m.Success)
             //{
-            //    RunAsync().GetAwaiter().GetResult();
+            //    Console.WriteLine(m.Value);
             //}
+
+            var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
+                minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
+
+            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            {
+                RunAsync().GetAwaiter().GetResult();
+            }
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
@@ -113,7 +109,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Ocorreram erro(s): {0}", ex.GetAllMessages()));
+                Log.Error(String.Format("Ocorreram erro(s): {0}", ex.GetAllMessages()));
             }
 
             Console.ReadLine();
@@ -171,8 +167,14 @@ namespace TogglJiraConsole
                     foreach (var data in retDetailedReport.data)
                     {
                         InfoWorklog infoWorklog = new InfoWorklog();
-                        infoWorklog.key = data.description.Substring(0, data.description.IndexOf(" - "));
-                        infoWorklog.comment = data.description.Substring(data.description.IndexOf(" - ") + 3);
+                        //infoWorklog.key = data.description.Substring(0, data.description.IndexOf(" - "));
+                        //infoWorklog.comment = data.description.Substring(data.description.IndexOf(" - ") + 3);
+                        Match numJira = Regex.Match(data.description, @"(\w+)\-\d{1,4}");
+                        if (numJira.Success)
+                        {
+                            infoWorklog.key = numJira.Value;
+                            infoWorklog.comment = data.description.Replace(numJira.Value, "");
+                        }
                         infoWorklog.dtStarted = data.start;
                         var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(data.start)).Replace("\"", "");
                         infoWorklog.started = startedAux.Replace(startedAux.Substring(19), ".000-0300");
@@ -267,7 +269,7 @@ namespace TogglJiraConsole
             }
             catch(Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu em PutTogglTags: {0}", ex.ToString()));
+                Log.Error(String.Format("Algum erro aconteceu em PutTogglTags: {0}", ex.ToString()));
                 return 0;
             }
 
@@ -292,7 +294,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
+                Log.Error(String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
                 return new Users();
             }
 
@@ -319,7 +321,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.GetAllMessages()));
+                Log.Error(String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.GetAllMessages()));
                 return new TagsPendente();
             }
 
