@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -27,39 +28,34 @@ namespace TogglJiraConsole
 
         public Service()
         {
-            _timer = new System.Timers.Timer(60000);
-            //_timer = new System.Timers.Timer(10000);
+            _timer = new System.Timers.Timer();
             _timer.Elapsed += timer_Elapsed;
         }
 
         static DateTime TimeStarterRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeStarterRun"], "HH:mm", CultureInfo.InvariantCulture);
         static DateTime TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {       
-                       
-            var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
-                minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
+        {
+            _timer.Interval = 60000;
+            Log.Debug("Passou aqui");
 
-            //Cria um evento no Visualisador de Eventos do Windows 
-            var sSource = "TogglJira";
-            var sLog = "Application";
-            var sEvent = $"{DateTime.Now.ToString("dd/MM/yyyy HH:mm")} == {dataInicio.ToString("dd/MM/yyyy HH:mm")}";
-            if (!EventLog.SourceExists(sSource))
-                EventLog.CreateEventSource(sSource, sLog);
-            EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
+            // ... Input string.
+            string input = "avd-332";
 
-            bool rodou = false;
+            // ... One or more digits.
+            //Match m = Regex.Match(input.ToLower(), @"[a-z0-9\-\0-9]");
+            Match m = Regex.Match(input.ToLower(), @"[a-zA-Z_0-9]\-[1-9]{4}$");
 
-            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
-            {
-                //Cria um evento no Visualisador de Eventos do Windows 
-                //EventLog.WriteEntry(sSource, "Sim é igual!!!", EventLogEntryType.Warning);
-                if ( !rodou)
-                {
-                    rodou = true;
-                    RunAsync().GetAwaiter().GetResult();
-                }
-            }
+            // ... Write value.
+            Console.WriteLine(m.Value);
+
+            //var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
+            //    minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
+
+            //if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            //{
+            //    RunAsync().GetAwaiter().GetResult();
+            //}
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
@@ -117,7 +113,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Ocorreram erro(s): {0}", ex.ToString()));
+                Log.Error(ex, String.Format("Ocorreram erro(s): {0}", ex.GetAllMessages()));
             }
 
             Console.ReadLine();
@@ -171,6 +167,7 @@ namespace TogglJiraConsole
                         UrlBaseToggl, email, default_wid, xidTagsPendente, since, until);
                     result = await client.GetAsync(URI);
                     var retDetailedReport = await result.Content.ReadAsAsync<DetailedReport>();
+                    retDetailedReport.data = retDetailedReport.data.OrderBy(i => i.start).ToList();
                     foreach (var data in retDetailedReport.data)
                     {
                         InfoWorklog infoWorklog = new InfoWorklog();
@@ -192,7 +189,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu no GetToggl: {0}", ex.ToString()));
+                Log.Error(ex, String.Format("Algum erro aconteceu no GetToggl: {0}", ex.GetAllMessages()));
                 return new List<InfoWorklog>();
             }
 
@@ -228,21 +225,7 @@ namespace TogglJiraConsole
                         Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
                         if (response.IsSuccessStatusCode)
                         {
-                            var tagsPendentes = await GetTagsPendente();
-
-                            //Toggl
-                            var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
-                            //var t = infoWorklog.tags.Where(i => i.ToString() != "_Pendente").ToArray();
-                            var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
-                            var xTags = String.Join(",", t);
-                            var paramToggl = new { time_entry = new { tags = t } };
-                            var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
-                            var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
-                            var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
-                            HttpResponseMessage responseToggl = await client.PutAsJsonAsync(URIToggl, paramToggl);
-
-                            Thread.Sleep(1000);
+                            var iToggl = await PutTogglTags(user: user, infoWorklog: infoWorklog);
                         }
                     }
                     
@@ -251,10 +234,41 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-
-                Log.Error(ex, String.Format("Algum erro aconteceu no PostJira/UpdateTagsToggl: {0}", ex.ToString()));
+                Log.Error(String.Format("Algum erro aconteceu no PostJira: {0}", ex.GetAllMessages()));
                 return 0;
+                
+            }
 
+        }
+
+        static async Task<int> PutTogglTags(User user, InfoWorklog infoWorklog)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var tagsPendentes = await GetTagsPendente();
+
+                    //Toggl
+                    var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
+                    var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
+                    var xTags = String.Join(",", t);
+                    var paramToggl = new { time_entry = new { tags = t } };
+                    var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
+                    var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
+                    var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
+                    HttpResponseMessage responseToggl = await client.PutAsJsonAsync(URIToggl, paramToggl);
+
+                    Thread.Sleep(1000);
+
+                    return 1;
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex, String.Format("Algum erro aconteceu em PutTogglTags: {0}", ex.ToString()));
+                return 0;
             }
 
         }
@@ -278,8 +292,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-
-                Log.Error(ex, String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.ToString()));
+                Log.Error(ex, String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
                 return new Users();
             }
 
@@ -306,7 +319,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.ToString()));
+                Log.Error(ex, String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.GetAllMessages()));
                 return new TagsPendente();
             }
 

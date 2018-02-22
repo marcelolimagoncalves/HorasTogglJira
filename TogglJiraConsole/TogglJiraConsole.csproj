@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DetailedReport.cs" />
+    <Compile Include="ExceptionMessages.cs" />
     <Compile Include="InfoWorklog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
