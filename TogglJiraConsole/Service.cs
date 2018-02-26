@@ -38,13 +38,6 @@ namespace TogglJiraConsole
         {
             _timer.Interval = 60000;
 
-            //string input = "Relatorio Movimento diário por linha não mostra coluna -Poupa Fila e não soma ao total transportado";
-            //Match m = Regex.Match(input.ToLower(), @"(\w+)\-\d{1,4}");
-            //if (m.Success)
-            //{
-            //    Console.WriteLine(m.Value);
-            //}
-
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 
@@ -58,14 +51,7 @@ namespace TogglJiraConsole
         static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
         static async Task RunAsync()
         {
-            //Cria um evento no Visualisador de Eventos do Windows 
-            //var sSource = "dotNET Sample App";
-            //var sLog = "Application";
-            //var sEvent = $"RunAsync()";
-            //if (!EventLog.SourceExists(sSource))
-            //    EventLog.CreateEventSource(sSource, sLog);
-            //EventLog.WriteEntry(sSource, sEvent, EventLogEntryType.Warning);
-
+            
             var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
             var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
                 minute: TimeEndRun.Minute, second: TimeEndRun.Second);
@@ -74,15 +60,12 @@ namespace TogglJiraConsole
             try
             {
                 Log.Debug("Iniciando a sincronizacao");
-                var usuarios = await GetUsuarios();
+                var usuarios = GetUsuarios();
                 if (usuarios.User.Count() > 0)
                 {
                     foreach (var usu in usuarios.User)
                     {
-                        if (parar)
-                        {
-                            break;
-                        }
+                        
 
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
                         Log.Info("Iniciando a sincronizacao");
@@ -143,7 +126,6 @@ namespace TogglJiraConsole
                     string xidTagsPendente = string.Empty;
                     if (retWorkspaceTags.Count > 0)
                     {
-                        //var idTagsPendente = retWorkspaceTags.Where(i => i.name == "_Pendente")
                         var idTagsPendente = retWorkspaceTags.Where(i => tagsPendentes.Tag.Contains(i.name.ToUpper()))
                             .Select(i => i.id).ToArray();
                         xidTagsPendente = String.Join(",", idTagsPendente);
@@ -158,17 +140,26 @@ namespace TogglJiraConsole
                         since = ConfigurationManager.AppSettings["since"];
                         until = ConfigurationManager.AppSettings["until"];
                     }
-                    
-                    URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}",
-                        UrlBaseToggl, email, default_wid, xidTagsPendente, since, until);
+
+                    var contPage = 1;
+                    List<Datum> ldata = new List<Datum>();
+                    URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}&page={6}",
+                        UrlBaseToggl, email, default_wid, xidTagsPendente, since, until, contPage);
                     result = await client.GetAsync(URI);
                     var retDetailedReport = await result.Content.ReadAsAsync<DetailedReport>();
-                    retDetailedReport.data = retDetailedReport.data.OrderBy(i => i.start).ToList();
-                    foreach (var data in retDetailedReport.data)
+                    ldata.AddRange(retDetailedReport.data.OrderBy(i => i.start).ToList());
+                    while (ldata.Count < retDetailedReport.total_count)
+                    {
+                        contPage++;
+                        URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}&page={6}",
+                        UrlBaseToggl, email, default_wid, xidTagsPendente, since, until, contPage);
+                        result = await client.GetAsync(URI);
+                        retDetailedReport = await result.Content.ReadAsAsync<DetailedReport>();
+                        ldata.AddRange(retDetailedReport.data.OrderBy(i => i.start).ToList());
+                    }
+                    foreach (var data in ldata)
                     {
                         InfoWorklog infoWorklog = new InfoWorklog();
-                        //infoWorklog.key = data.description.Substring(0, data.description.IndexOf(" - "));
-                        //infoWorklog.comment = data.description.Substring(data.description.IndexOf(" - ") + 3);
                         Match numJira = Regex.Match(data.description, @"(\w+)\-\d{1,4}");
                         if (numJira.Success)
                         {
@@ -212,23 +203,14 @@ namespace TogglJiraConsole
                     if (response.IsSuccessStatusCode)
                     {
                         var returnValue = await response.Content.ReadAsAsync<WorklogPost>();
-                        if (returnValue.started != infoWorklog.dtStarted)
+                        
+                        var iTimeStarted = await PutTimeStarted(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
+                        if(iTimeStarted == 0)
                         {
-                            URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, returnValue.id);
-                            var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
-                            startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
-                            var paramPut = new { started = startedAux };
-                            response = await client.PutAsJsonAsync(URI, paramPut);
-                            if (response.IsSuccessStatusCode)
-                            {
-                                returnValue = await response.Content.ReadAsAsync<WorklogPost>();
-                            }  
+                            Log.Info($"Ocorreu algum erro na atualização da data de início de trabalho.");
                         }
                         Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var iToggl = await PutTogglTags(user: user, infoWorklog: infoWorklog);
-                        }
+                        var iToggl = await PutTogglTags(user: user, infoWorklog: infoWorklog);
                     }
                     
                 }
@@ -239,6 +221,43 @@ namespace TogglJiraConsole
                 Log.Error(String.Format("Algum erro aconteceu no PostJira: {0}", ex.GetAllMessages()));
                 return 0;
                 
+            }
+
+        }
+
+        static async Task<int> PutTimeStarted(User user, WorklogPost worklogPost, InfoWorklog infoWorklog)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    
+                    if (worklogPost.started != infoWorklog.dtStarted)
+                    {
+                        var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, worklogPost.id);
+                        var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
+                        startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
+                        var paramPut = new { started = startedAux };
+                        var token = user.xTokenJira;
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
+                        var response = await client.PutAsJsonAsync(URI, paramPut);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+
+                    return 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(String.Format("Algum erro aconteceu em PutTimeStarted: {0}", ex.ToString()));
+                return 0;
             }
 
         }
@@ -275,7 +294,7 @@ namespace TogglJiraConsole
 
         }
 
-        static async Task<Users> GetUsuarios()
+        static Users GetUsuarios()
         {
             try
             {
@@ -289,7 +308,7 @@ namespace TogglJiraConsole
                 reader.Read();
 
                 Users usu = (Users)ser.Deserialize(reader);
-
+                
                 return usu;
             }
             catch (Exception ex)
