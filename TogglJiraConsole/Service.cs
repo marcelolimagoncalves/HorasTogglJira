@@ -19,6 +19,9 @@ namespace TogglJiraConsole
 {
     public class Service
     {
+        private static bool running = false;
+        private static bool setinterval = true;
+
         /// <summary>
         /// Instância para registro de logs.
         /// </summary>
@@ -28,7 +31,7 @@ namespace TogglJiraConsole
 
         public Service()
         {
-            _timer = new System.Timers.Timer();
+            _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += timer_Elapsed;
         }
 
@@ -36,22 +39,29 @@ namespace TogglJiraConsole
         static DateTime TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            _timer.Interval = 60000;
+            if (setinterval)
+            {
+                _timer.Interval = 60000;
+                setinterval = false;
+            }
 
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 
             if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
             {
-                RunAsync();
+                if (!running)
+                {
+                    Run();
+                }
             }
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
         static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
-        static void RunAsync()
+        public void Run()
         {
-            
+            running = true;
             var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
             var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
                 minute: TimeEndRun.Minute, second: TimeEndRun.Second);
@@ -59,19 +69,23 @@ namespace TogglJiraConsole
             bool parar = false;
             try
             {
-                Log.Debug("Iniciando a sincronizacao");
+
+                Log.Debug("Buscando os usuários no arquivo Users.xml");
                 var usuarios = GetUsuarios();
                 if (usuarios.User.Count() > 0)
                 {
                     foreach (var usu in usuarios.User)
                     {
-                        if(parar == true)
+                        Log.Debug($"Iniciando a sincronização do usuário {usu.XNome}");
+                        if (parar == true)
                         {
                             break;
                         }
 
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
                         Log.Info("Iniciando a sincronizacao");
+
+                        Log.Debug($"Buscando as horas lançadas no toggl");
                         var toggl = GetToggl(user: usu);
                         if (toggl.Count() > 0)
                         {
@@ -84,6 +98,7 @@ namespace TogglJiraConsole
                                     break;
                                 }
 
+                                Log.Debug($"Inserindo no Jira a hora {t.key} - {t.comment}");
                                 var iJira = PostJira(user: usu, infoWorklog: t);
                             }
                         }
@@ -217,12 +232,15 @@ namespace TogglJiraConsole
                     HttpResponseMessage response = client.PostAsJsonAsync(URI, param).Result;
                     if (response.IsSuccessStatusCode)
                     {
+                        Log.Debug($"Jira foi inserido com sucesso");
                         var returnValue = response.Content.ReadAsAsync<WorklogPost>().Result;
-                        
+
+                        Log.Debug($"Verificando se hora de inicio da atividade está correta");
                         var iTimeStarted = PutTimeStarted(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
                         if(iTimeStarted == 0)
                         {
                             Log.Info($"Ocorreu algum erro na atualização da data de início de trabalho.");
+                            Log.Debug($"Tentando deletar o horário inserido anteriormente");
                             var iDeleteWorklog = DeleteWorklog(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
                             if(iDeleteWorklog == 0)
                             {
@@ -232,9 +250,14 @@ namespace TogglJiraConsole
                         else
                         {
                             Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
+                            Log.Debug($"Tentando retirar as tags pendentes do toggl referente");
                             var iToggl = PutTogglTags(user: user, infoWorklog: infoWorklog);
                         }
                         
+                    }
+                    else
+                    {
+                        Log.Debug($"Jira não foi inserido com sucesso. StatusCode: {(int)response.StatusCode}");
                     }
                     
                 }
@@ -262,14 +285,15 @@ namespace TogglJiraConsole
                     var response = client.DeleteAsync(URI).Result;
                     if (response.IsSuccessStatusCode)
                     {
+                        Log.Debug($"O horário foi deletado com sucesso");
                         return 1;
                     }
                     else
                     {
+                        Log.Debug($"O horário não foi deletado com sucesso. StatusCode: {(int)response.StatusCode}");
                         return 0;
                     }
 
-                    return 1;
                 }
             }
             catch (Exception ex)
@@ -289,6 +313,7 @@ namespace TogglJiraConsole
                     
                     if (worklogPost.started != infoWorklog.dtStarted)
                     {
+                        Log.Debug($"Horario está incorreto. Atualizando o horário");
                         var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, worklogPost.id);
                         var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
                         startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
@@ -298,14 +323,17 @@ namespace TogglJiraConsole
                         var response = client.PutAsJsonAsync(URI, paramPut).Result;
                         if (response.IsSuccessStatusCode)
                         {
+                            Log.Debug($"Horario atualizado com sucesso");
                             return 1;
                         }
                         else
                         {
+                            Log.Debug($"Horario não atualizado com sucesso. StatusCode: {(int)response.StatusCode}");
                             return 0;
                         }
                     }
 
+                    Log.Debug($"Horario não está incorreto");
                     return 1;
                 }
             }
@@ -323,6 +351,7 @@ namespace TogglJiraConsole
             {
                 using (var client = new HttpClient())
                 {
+                    Log.Debug($"Buscando as tags que serão consideradas como pendente no arquivo TagsPendente.xml");
                     var tagsPendentes = GetTagsPendente();
 
                     //Toggl
@@ -338,7 +367,18 @@ namespace TogglJiraConsole
 
                     Thread.Sleep(1000);
 
-                    return 1;
+                    if (responseToggl.IsSuccessStatusCode)
+                    {
+                        Log.Debug($"Tags excluidas com sucesso");
+                        return 1;
+                    }
+                    else
+                    {
+                        Log.Debug($"Tags não foram excluidas com sucesso. StatusCode: {(int)responseToggl.StatusCode}");
+                        return 0;
+                    }
+
+
                 }
             }
             catch(Exception ex)
