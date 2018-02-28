@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -98,8 +99,9 @@ namespace TogglJiraConsole
                                     break;
                                 }
 
-                                Log.Debug($"Inserindo no Jira a hora {t.key} - {t.comment}");
+                                Log.Info($"Inserindo: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ");
                                 var iJira = PostJira(user: usu, infoWorklog: t);
+                                Thread.Sleep(1000);
                             }
                         }
                         Log.Info("Fim da sincronizacao");
@@ -133,11 +135,10 @@ namespace TogglJiraConsole
                     var retUserToggl = result.Content.ReadAsAsync<UserToggl>().Result;
                     var email = retUserToggl.data.email;
                     var default_wid = retUserToggl.data.default_wid;
-
-                    var tagsPendentes = GetTagsPendente();
-
                     Thread.Sleep(1000);
 
+                    var tagsPendentes = GetTagsPendente();
+                                        
                     URI = String.Format("{0}/api/v8/workspaces/{1}/tags", UrlBaseToggl, default_wid);
                     result = client.GetAsync(URI).Result;
                     List<WorkspaceTags> retWorkspaceTags = result.Content.ReadAsAsync<List<WorkspaceTags>>().Result;
@@ -148,7 +149,6 @@ namespace TogglJiraConsole
                             .Select(i => i.id).ToArray();
                         xidTagsPendente = String.Join(",", idTagsPendente);
                     }
-
                     Thread.Sleep(1000);
 
                     var since = DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd");
@@ -174,7 +174,9 @@ namespace TogglJiraConsole
                         result = client.GetAsync(URI).Result;
                         retDetailedReport = result.Content.ReadAsAsync<DetailedReport>().Result;
                         ldata.AddRange(retDetailedReport.data.OrderBy(i => i.start).ToList());
+                        Thread.Sleep(1000);
                     }
+                    Thread.Sleep(1000);
                     foreach (var data in ldata)
                     {
                         InfoWorklog infoWorklog = new InfoWorklog();
@@ -249,15 +251,20 @@ namespace TogglJiraConsole
                         }
                         else
                         {
-                            Log.Info($"{infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ");
+                            
                             Log.Debug($"Tentando retirar as tags pendentes do toggl referente");
                             var iToggl = PutTogglTags(user: user, infoWorklog: infoWorklog);
+                            Thread.Sleep(1000);
                         }
                         
                     }
                     else
                     {
-                        Log.Debug($"Jira não foi inserido com sucesso. StatusCode: {(int)response.StatusCode}");
+                        var message = response.Content.ReadAsStringAsync().Result;
+                        int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
+                        int pTo = message.LastIndexOf("</h1>");
+                        String result = message.Substring(pFrom, pTo - pFrom);
+                        Log.Debug($"Jira não foi inserido com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
                     }
                     
                 }
@@ -290,7 +297,11 @@ namespace TogglJiraConsole
                     }
                     else
                     {
-                        Log.Debug($"O horário não foi deletado com sucesso. StatusCode: {(int)response.StatusCode}");
+                        var message = response.Content.ReadAsStringAsync().Result;
+                        int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
+                        int pTo = message.LastIndexOf("</h1>");
+                        String result = message.Substring(pFrom, pTo - pFrom);
+                        Log.Debug($"O horário não foi deletado com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
                         return 0;
                     }
 
@@ -328,7 +339,11 @@ namespace TogglJiraConsole
                         }
                         else
                         {
-                            Log.Debug($"Horario não atualizado com sucesso. StatusCode: {(int)response.StatusCode}");
+                            var message = response.Content.ReadAsStringAsync().Result;
+                            int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
+                            int pTo = message.LastIndexOf("</h1>");
+                            String result = message.Substring(pFrom, pTo - pFrom);
+                            Log.Debug($"Horario não atualizado com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
                             return 0;
                         }
                     }
@@ -365,8 +380,6 @@ namespace TogglJiraConsole
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
                     HttpResponseMessage responseToggl = client.PutAsJsonAsync(URIToggl, paramToggl).Result;
 
-                    Thread.Sleep(1000);
-
                     if (responseToggl.IsSuccessStatusCode)
                     {
                         Log.Debug($"Tags excluidas com sucesso");
@@ -374,7 +387,11 @@ namespace TogglJiraConsole
                     }
                     else
                     {
-                        Log.Debug($"Tags não foram excluidas com sucesso. StatusCode: {(int)responseToggl.StatusCode}");
+                        var message = responseToggl.Content.ReadAsStringAsync().Result;
+                        int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
+                        int pTo = message.LastIndexOf("</h1>");
+                        String result = message.Substring(pFrom, pTo - pFrom);
+                        Log.Debug($"Tags não foram excluidas com sucesso. StatusCode: {(int)responseToggl.StatusCode}. Message: {result}");
                         return 0;
                     }
 

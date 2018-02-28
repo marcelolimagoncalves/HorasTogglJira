@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Users>
   <!--marcelo teste casa-->
-  <!--<User>
+  <User>
     <xNome>Marcelo</xNome>
     <xTokenToggl>146d8dcc2354067661fa4ea944ebc5d2</xTokenToggl>
     <xTokenJira>bWFyY2Vsb2xpbWFnb25jYWx2ZXM6OTc5MDg5OTQ=</xTokenJira>
-  </User>-->
+  </User>
   
   <!--marcelo teste transdata-->
   <!--<User>
@@ -22,11 +22,11 @@
   </User>-->
   
   <!--Alessandro oficial transdata-->
-  <User>
+  <!--<User>
     <xNome>Alessandro Marcelino</xNome>
     <xTokenToggl>9c4e893a14c215cc3e2407c74da7b478</xTokenToggl>
     <xTokenJira>YWxlc3NhbmRyby5tYXJjZWxpbm86d29sdmVyaW5l</xTokenJira>
-  </User>
+  </User>-->
 </Users>
 
 
