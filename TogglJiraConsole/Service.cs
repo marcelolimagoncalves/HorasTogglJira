@@ -27,6 +27,8 @@ namespace TogglJiraConsole
         /// Instância para registro de logs.
         /// </summary>
         private static Logger Log = LogManager.GetCurrentClassLogger();
+        private static Logger LogArqErros = LogManager.GetLogger("ArquivoUserErros");
+        private static Logger LogArqSucesso = LogManager.GetLogger("ArquivoUserSucesso");
 
         private System.Timers.Timer _timer;
 
@@ -85,6 +87,8 @@ namespace TogglJiraConsole
 
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
                         Log.Info("Iniciando a sincronizacao");
+                        LogArqErros.Info("Iniciando a sincronizacao");
+                        LogArqSucesso.Info("Iniciando a sincronizacao");
 
                         Log.Debug($"Buscando as horas lançadas no toggl");
                         var toggl = GetToggl(user: usu);
@@ -99,20 +103,25 @@ namespace TogglJiraConsole
                                     break;
                                 }
 
-                                Log.Info($"Inserindo: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ");
+                                Log.Info($"Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ");
+                                LogArqErros.Info($"Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ");
+                                LogArqSucesso.Info($"Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ");
                                 var iJira = PostJira(user: usu, infoWorklog: t);
                                 Thread.Sleep(1000);
                             }
                         }
                         Log.Info("Fim da sincronizacao");
-                        
+                        LogArqErros.Info("Fim da sincronizacao");
+                        LogArqSucesso.Info("Fim da sincronizacao");
+
                     }
                 }
                 Log.Debug("Fim da sincronizacao");
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Ocorreram erro(s): {0}", ex.GetAllMessages()));
+                Log.Error($"Ocorreram erro(s) durante o processo.");
+                LogArqErros.Error(String.Format("Ocorreram erro(s): {0}", ex.GetAllMessages()));
             }
 
             Console.ReadLine();
@@ -214,7 +223,8 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(ex, String.Format("Algum erro aconteceu no GetToggl: {0}", ex.GetAllMessages()));
+                Log.Error($"Toggl - Algum erro aconteceu ao buscar os Registros de trabalho pendentes.");
+                LogArqErros.Error(String.Format("Toggl - Algum erro aconteceu ao buscar os Registros de trabalho pendentes: {0}", ex.GetAllMessages()));
                 return new List<InfoWorklog>();
             }
 
@@ -234,20 +244,17 @@ namespace TogglJiraConsole
                     HttpResponseMessage response = client.PostAsJsonAsync(URI, param).Result;
                     if (response.IsSuccessStatusCode)
                     {
-                        Log.Debug($"Jira foi inserido com sucesso");
+                        Log.Info($"Jira - Registro de trabalho foi inserido com sucesso");
+                        LogArqSucesso.Info($"Jira - Registro de trabalho foi inserido com sucesso");
+
                         var returnValue = response.Content.ReadAsAsync<WorklogPost>().Result;
 
                         Log.Debug($"Verificando se hora de inicio da atividade está correta");
                         var iTimeStarted = PutTimeStarted(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
                         if(iTimeStarted == 0)
                         {
-                            Log.Info($"Ocorreu algum erro na atualização da data de início de trabalho.");
                             Log.Debug($"Tentando deletar o horário inserido anteriormente");
                             var iDeleteWorklog = DeleteWorklog(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
-                            if(iDeleteWorklog == 0)
-                            {
-                                Log.Info($"Ocorreu algum erro ao deletar a data de início de trabalho.");
-                            }
                         }
                         else
                         {
@@ -264,7 +271,9 @@ namespace TogglJiraConsole
                         int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
                         int pTo = message.LastIndexOf("</h1>");
                         String result = message.Substring(pFrom, pTo - pFrom);
-                        Log.Debug($"Jira não foi inserido com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
+
+                        Log.Error($"Jira - Ocorreu algum erro ao inserir o Registro de trabalho.");
+                        LogArqErros.Error($"Jira - Ocorreu algum erro ao inserir o Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}");
                     }
                     
                 }
@@ -272,7 +281,8 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu no PostJira: {0}", ex.GetAllMessages()));
+                Log.Error($"Jira - Ocorreu algum erro ao inserir o Registro de trabalho.");
+                LogArqErros.Error(String.Format("Jira - Ocorreu algum erro ao inserir o Registro de trabalho: {0}", ex.GetAllMessages()));
                 return 0;
                 
             }
@@ -301,7 +311,8 @@ namespace TogglJiraConsole
                         int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
                         int pTo = message.LastIndexOf("</h1>");
                         String result = message.Substring(pFrom, pTo - pFrom);
-                        Log.Debug($"O horário não foi deletado com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
+                        Log.Error($"Jira - Ocorreu algum erro ao deletar o Registro de trabalho.");
+                        LogArqErros.Error($"Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {(int)response.StatusCode}. Message: {result}");
                         return 0;
                     }
 
@@ -309,7 +320,8 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu em DeleteWorklog: {0}", ex.ToString()));
+                Log.Error(String.Format("Jira - Ocorreu algum erro ao deletar o Registro de trabalho."));
+                LogArqErros.Error(String.Format("Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {0}", ex.GetAllMessages()));
                 return 0;
             }
 
@@ -343,7 +355,8 @@ namespace TogglJiraConsole
                             int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
                             int pTo = message.LastIndexOf("</h1>");
                             String result = message.Substring(pFrom, pTo - pFrom);
-                            Log.Debug($"Horario não atualizado com sucesso. StatusCode: {(int)response.StatusCode}. Message: {result}");
+                            Log.Error($"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.");
+                            LogArqErros.Error($"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}");
                             return 0;
                         }
                     }
@@ -354,7 +367,8 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu em PutTimeStarted: {0}", ex.ToString()));
+                Log.Error($"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.");
+                LogArqErros.Error(String.Format("Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho: {0}", ex.GetAllMessages()));
                 return 0;
             }
 
@@ -391,7 +405,8 @@ namespace TogglJiraConsole
                         int pFrom = message.IndexOf("<h1>") + "<h1>".Length;
                         int pTo = message.LastIndexOf("</h1>");
                         String result = message.Substring(pFrom, pTo - pFrom);
-                        Log.Debug($"Tags não foram excluidas com sucesso. StatusCode: {(int)responseToggl.StatusCode}. Message: {result}");
+                        Log.Error($"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.");
+                        Log.Error($"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes. StatusCode: {(int)responseToggl.StatusCode}. Message: {result}");
                         return 0;
                     }
 
@@ -400,7 +415,8 @@ namespace TogglJiraConsole
             }
             catch(Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu em PutTogglTags: {0}", ex.ToString()));
+                Log.Error($"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.");
+                LogArqErros.Error(String.Format("Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes: {0}", ex.GetAllMessages()));
                 return 0;
             }
 
@@ -425,7 +441,8 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
+                Log.Error(String.Format("Usuarios - Algum erro aconteceu na leitura dos usuarios."));
+                LogArqErros.Error(String.Format("Usuarios - Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
                 return new Users();
             }
 
@@ -452,7 +469,7 @@ namespace TogglJiraConsole
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Algum erro aconteceu na leitura das tags pendentes: {0}", ex.GetAllMessages()));
+                LogArqErros.Error(String.Format("Tags - Algum erro aconteceu na leitura das tags pendentes: {0}", ex.GetAllMessages()));
                 return new TagsPendente();
             }
 
@@ -460,62 +477,71 @@ namespace TogglJiraConsole
 
         static string MilisecondsToJiraFormat(int mili)
         {
-            var weeks = 0;
-            var days = 0;
-            var hours = 0;
-            var minutes = (mili / 1000) / 60;
-            if (minutes < 1)
+
+            try
             {
+                var weeks = 0;
+                var days = 0;
+                var hours = 0;
+                var minutes = (mili / 1000) / 60;
+                if (minutes < 1)
+                {
+                    return string.Empty;
+                }
+
+                if (minutes >= 10080)
+                {
+                    while (minutes >= 10080)
+                    {
+                        weeks++;
+                        minutes = minutes - 10080;
+                    }
+                }
+
+                if (minutes >= 1440)
+                {
+                    while (minutes >= 1440)
+                    {
+                        days++;
+                        minutes = minutes - 1440;
+                    }
+                }
+
+                if (minutes >= 60)
+                {
+
+                    while (minutes >= 60)
+                    {
+                        hours++;
+                        minutes = minutes - 60;
+                    }
+                }
+
+                string ret = string.Empty;
+                if (weeks > 0)
+                {
+                    ret = string.Format("{0}w ", weeks);
+                }
+                if (days > 0)
+                {
+                    ret = ret + string.Format("{0}d ", days);
+                }
+                if (hours > 0)
+                {
+                    ret = ret + string.Format("{0}h ", hours);
+                }
+                if (minutes >= 1)
+                {
+                    ret = ret + string.Format("{0}m", minutes);
+                }
+
+                return ret;
+            }
+            catch(Exception ex)
+            {
+                LogArqErros.Error(String.Format("Formatar horário - Algum erro aconteceu na conversão do tempo total gasto do toggl para o jira: {0}", ex.GetAllMessages()));
                 return string.Empty;
             }
-
-            if (minutes >= 10080)
-            {
-                while (minutes >= 10080)
-                {
-                    weeks++;
-                    minutes = minutes - 10080;
-                }
-            }
-
-            if (minutes >= 1440)
-            {
-                while (minutes >= 1440)
-                {
-                    days++;
-                    minutes = minutes - 1440;
-                }
-            }
-
-            if (minutes >= 60)
-            {
-
-                while (minutes >= 60)
-                {
-                    hours++;
-                    minutes = minutes - 60;
-                }
-            }
-
-            string ret = string.Empty;
-            if (weeks > 0)
-            {
-                ret = string.Format("{0}w ", weeks);
-            }
-            if (days > 0)
-            {
-                ret = ret + string.Format("{0}d ", days);
-            }
-            if (hours > 0)
-            {
-                ret = ret + string.Format("{0}h ", hours);
-            }
-            if (minutes >= 1)
-            {
-                ret = ret + string.Format("{0}m", minutes);
-            }
-
-            return ret;
         }
 
         public void Start()
