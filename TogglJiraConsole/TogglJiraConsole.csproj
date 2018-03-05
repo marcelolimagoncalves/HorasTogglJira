@@ -56,17 +56,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DetailedReport.cs" />
-    <Compile Include="ExceptionMessages.cs" />
-    <Compile Include="InfoWorklog.cs" />
+    <Compile Include="Service-bkp.cs" />
+    <Compile Include="XmlModel\ArquivoXml.cs" />
+    <Compile Include="ToggModel\DetailedReport.cs" />
+    <Compile Include="UtilModel\ExceptionMessages.cs" />
+    <Compile Include="JiraModel\InfoWorklog.cs" />
+    <Compile Include="JiraModel\Jira.cs" />
+    <Compile Include="LogModel\Log.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunService.cs" />
     <Compile Include="Service.cs" />
-    <Compile Include="TagsPendente.cs" />
-    <Compile Include="User.cs" />
-    <Compile Include="UserToggl.cs" />
-    <Compile Include="WorklogPost.cs" />
-    <Compile Include="WorkspaceTags.cs" />
+    <Compile Include="XmlModel\TagsPendente.cs" />
+    <Compile Include="ToggModel\Toggl.cs" />
+    <Compile Include="XmlModel\User.cs" />
+    <Compile Include="ToggModel\UserToggl.cs" />
+    <Compile Include="UtilModel\Util.cs" />
+    <Compile Include="JiraModel\WorklogPost.cs" />
+    <Compile Include="ToggModel\WorkspaceTags.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -82,5 +89,6 @@
     <Content Include="TagsPendente.xml" />
     <Content Include="Users.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

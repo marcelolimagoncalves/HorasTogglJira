@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace TogglJiraConsole
+namespace TogglJiraConsole.XmlModel
 {
     [XmlRoot(ElementName = "tags")]
     public class TagsPendente
