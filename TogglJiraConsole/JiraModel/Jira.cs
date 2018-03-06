@@ -20,7 +20,8 @@ namespace TogglJiraConsole.JiraModel
         private Toggl toggl;
         public Jira()
         {
-            log = new Log();
+            //log = new Log();
+            log = Log.Instance;
             toggl = new Toggl();
         }
 

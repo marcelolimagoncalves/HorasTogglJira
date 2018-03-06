@@ -10,6 +10,19 @@ namespace TogglJiraConsole.LogModel
     
     public class Log
     {
+        private static Log instance;
+        public static Log Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new Log();
+                }
+                return instance;
+            }
+        }
+
         /// <summary>
         /// Instância para registro de logs.
         /// </summary>
@@ -17,15 +30,16 @@ namespace TogglJiraConsole.LogModel
         private static Logger LogArqErro = LogManager.GetLogger("ArquivoUserErros");
         private static Logger LogArqSucesso = LogManager.GetLogger("ArquivoUserSucesso");
 
-        public Log()
+        private Log()
         {
             lLogArqPrincipal = new List<LogInfo>();
             lLogArqErro = new List<LogInfo>();
             lLogArqSucesso = new List<LogInfo>();
         }
-        public List<LogInfo> lLogArqPrincipal { get; set; }
-        public List<LogInfo> lLogArqErro { get; set; }
-        public List<LogInfo> lLogArqSucesso { get; set; }
+        private List<LogInfo> lLogArqPrincipal { get; set; }
+        private List<LogInfo> lLogArqErro { get; set; }
+        private List<LogInfo> lLogArqSucesso { get; set; }
+        public int countErros { get; set; }
 
         public void InserirSalvarLog(string message, ArqLog arqLog, LogLevel logLevel)
         {
@@ -42,6 +56,7 @@ namespace TogglJiraConsole.LogModel
                     break;
                 case ArqLog.Erro:
                     lLogArqErro.Add(new LogInfo() { mensagem = message, logLevel = logLevel });
+                    if (logLevel == LogLevel.Error) countErros++;
                     break;
                 case ArqLog.Sucesso:
                     lLogArqSucesso.Add(new LogInfo() { mensagem = message, logLevel = logLevel });

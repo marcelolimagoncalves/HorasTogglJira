@@ -23,7 +23,8 @@ namespace TogglJiraConsole
         private Jira jira;
         public RunService()
         {
-            log = new Log();
+            //log = new Log();
+            log = Log.Instance;
             xml = new ArquivoXml();
             usuarios = xml.LerArqUsuarios();
             toggl = new Toggl();
@@ -83,7 +84,10 @@ namespace TogglJiraConsole
                                     break;
                                 }
 
-                                //LogInfoJira = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
+                                message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
+                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
+                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
+                                //log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
                                 var iJira = jira.PostJira(user: usu, infoWorklog: t);
                                 Thread.Sleep(1000);
 
@@ -104,6 +108,14 @@ namespace TogglJiraConsole
 
                                 //LogArqSucesso.Info(LogInfoJira);
                                 //LogArqSucesso.Info($"Jira - Registro de trabalho foi inserido com sucesso.");
+
+                                if(log.countErros <= 0)
+                                {
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
+                                    message = $"Jira - Registro de trabalho foi inserido com sucesso.";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
+                                }
+                                
                                 cont++;
                             }
 

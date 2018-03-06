@@ -24,7 +24,8 @@ namespace TogglJiraConsole.TogglModel
         private TagsPendente tagsPendentes;
         public Toggl()
         {
-            log = new Log();
+            //log = new Log();
+            log = Log.Instance;
             util = new Util();
             xml = new ArquivoXml();
             tagsPendentes = xml.LerArqTagsPendente();
