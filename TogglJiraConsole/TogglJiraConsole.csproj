@@ -57,13 +57,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JiraModel\RetPostJira.cs" />
-    <Compile Include="ToggModel\RetConverterParaInfoWorklog.cs" />
+    <Compile Include="TogglModel\RetConverterParaInfoWorklog.cs" />
     <Compile Include="Service-bkp.cs" />
-    <Compile Include="ToggModel\RetGetDetailedReport.cs" />
-    <Compile Include="ToggModel\RetGetUserToggl.cs" />
-    <Compile Include="ToggModel\RetGetWorkspaceTags.cs" />
+    <Compile Include="TogglModel\RetGetDetailedReport.cs" />
+    <Compile Include="TogglModel\RetGetUserToggl.cs" />
+    <Compile Include="TogglModel\RetGetWorkspaceTags.cs" />
     <Compile Include="XmlModel\ArquivoXml.cs" />
-    <Compile Include="ToggModel\DetailedReport.cs" />
+    <Compile Include="TogglModel\DetailedReport.cs" />
     <Compile Include="UtilModel\ExceptionMessages.cs" />
     <Compile Include="JiraModel\InfoWorklog.cs" />
     <Compile Include="JiraModel\Jira.cs" />
@@ -73,15 +73,17 @@
     <Compile Include="RunService.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="XmlModel\TagsPendente.cs" />
-    <Compile Include="ToggModel\Toggl.cs" />
+    <Compile Include="TogglModel\Toggl.cs" />
     <Compile Include="XmlModel\User.cs" />
-    <Compile Include="ToggModel\UserToggl.cs" />
+    <Compile Include="TogglModel\UserToggl.cs" />
     <Compile Include="UtilModel\Util.cs" />
     <Compile Include="JiraModel\WorklogPost.cs" />
-    <Compile Include="ToggModel\WorkspaceTags.cs" />
+    <Compile Include="TogglModel\WorkspaceTags.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

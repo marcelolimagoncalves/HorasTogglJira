@@ -66,7 +66,7 @@ namespace TogglJiraConsole.LogModel
                     {
                         lLogArqPrincipal.ForEach(i =>
                         {
-                            EscreverArqLog(logInfo: i);
+                            EscreverArqLog(logInfo: i, arqLog: arqLog);
                         });
                     }
                     lLogArqPrincipal.Clear();
@@ -76,7 +76,7 @@ namespace TogglJiraConsole.LogModel
                     {
                         lLogArqErro.ForEach(i =>
                         {
-                            EscreverArqLog(logInfo: i);
+                            EscreverArqLog(logInfo: i, arqLog: arqLog);
                         });
                     }
                     lLogArqErro.Clear();
@@ -86,7 +86,7 @@ namespace TogglJiraConsole.LogModel
                     {
                         lLogArqSucesso.ForEach(i =>
                         {
-                            EscreverArqLog(logInfo: i);
+                            EscreverArqLog(logInfo: i, arqLog: arqLog);
                         });
                     }
                     lLogArqSucesso.Clear();
@@ -96,29 +96,83 @@ namespace TogglJiraConsole.LogModel
             
         }
 
-        public void EscreverArqLog(LogInfo logInfo)
+        public void EscreverArqLog(LogInfo logInfo, ArqLog arqLog)
         {
-            switch (logInfo.logLevel)
+
+            switch (arqLog)
             {
-                case LogLevel.Trace:
-                    LogArqPrincipal.Trace(logInfo.mensagem);
+                case ArqLog.Principal:
+                    switch (logInfo.logLevel)
+                    {
+                        case LogLevel.Trace:
+                            LogArqPrincipal.Trace(logInfo.mensagem);
+                            break;
+                        case LogLevel.Debug:
+                            LogArqPrincipal.Debug(logInfo.mensagem);
+                            break;
+                        case LogLevel.Info:
+                            LogArqPrincipal.Info(logInfo.mensagem);
+                            break;
+                        case LogLevel.Warn:
+                            LogArqPrincipal.Warn(logInfo.mensagem);
+                            break;
+                        case LogLevel.Error:
+                            LogArqPrincipal.Error(logInfo.mensagem);
+                            break;
+                        case LogLevel.Fatal:
+                            LogArqPrincipal.Fatal(logInfo.mensagem);
+                            break;
+                    }
                     break;
-                case LogLevel.Debug:
-                    LogArqPrincipal.Debug(logInfo.mensagem);
+                case ArqLog.Erro:
+                    switch (logInfo.logLevel)
+                    {
+                        case LogLevel.Trace:
+                            LogArqErro.Trace(logInfo.mensagem);
+                            break;
+                        case LogLevel.Debug:
+                            LogArqErro.Debug(logInfo.mensagem);
+                            break;
+                        case LogLevel.Info:
+                            LogArqErro.Info(logInfo.mensagem);
+                            break;
+                        case LogLevel.Warn:
+                            LogArqErro.Warn(logInfo.mensagem);
+                            break;
+                        case LogLevel.Error:
+                            LogArqErro.Error(logInfo.mensagem);
+                            break;
+                        case LogLevel.Fatal:
+                            LogArqErro.Fatal(logInfo.mensagem);
+                            break;
+                    }
                     break;
-                case LogLevel.Info:
-                    LogArqPrincipal.Info(logInfo.mensagem);
-                    break;
-                case LogLevel.Warn:
-                    LogArqPrincipal.Warn(logInfo.mensagem);
-                    break;
-                case LogLevel.Error:
-                    LogArqPrincipal.Error(logInfo.mensagem);
-                    break;
-                case LogLevel.Fatal:
-                    LogArqPrincipal.Fatal(logInfo.mensagem);
+                case ArqLog.Sucesso:
+                    switch (logInfo.logLevel)
+                    {
+                        case LogLevel.Trace:
+                            LogArqSucesso.Trace(logInfo.mensagem);
+                            break;
+                        case LogLevel.Debug:
+                            LogArqSucesso.Debug(logInfo.mensagem);
+                            break;
+                        case LogLevel.Info:
+                            LogArqSucesso.Info(logInfo.mensagem);
+                            break;
+                        case LogLevel.Warn:
+                            LogArqSucesso.Warn(logInfo.mensagem);
+                            break;
+                        case LogLevel.Error:
+                            LogArqSucesso.Error(logInfo.mensagem);
+                            break;
+                        case LogLevel.Fatal:
+                            LogArqSucesso.Fatal(logInfo.mensagem);
+                            break;
+                    }
                     break;
             }
+
+            
         }
     }
 

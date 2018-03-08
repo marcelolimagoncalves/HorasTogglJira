@@ -65,6 +65,9 @@ namespace TogglJiraConsole.JiraModel
 
                         message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                        message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                         message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
 
@@ -79,6 +82,9 @@ namespace TogglJiraConsole.JiraModel
             {
                 message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                 message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho: {ex.GetAllMessages()}";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
 
@@ -117,6 +123,9 @@ namespace TogglJiraConsole.JiraModel
 
                         message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                        message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                         message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {(int)response.StatusCode}. Message: {result}";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                         
@@ -129,6 +138,9 @@ namespace TogglJiraConsole.JiraModel
             {
                 message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                 message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {ex.GetAllMessages()}";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                 
@@ -174,6 +186,9 @@ namespace TogglJiraConsole.JiraModel
 
                         message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                        message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                         message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
 
@@ -185,6 +200,9 @@ namespace TogglJiraConsole.JiraModel
             {
                 message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
+                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                 message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho: {ex.GetAllMessages()}";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                 

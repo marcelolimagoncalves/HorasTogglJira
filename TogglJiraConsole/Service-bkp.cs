@@ -17,7 +17,6 @@ using System.Xml;
 using System.Xml.Serialization;
 using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.TogglModel;
-using TogglJiraConsole.ToggModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
 
