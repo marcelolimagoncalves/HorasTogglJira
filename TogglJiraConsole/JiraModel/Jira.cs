@@ -20,14 +20,13 @@ namespace TogglJiraConsole.JiraModel
         private Toggl toggl;
         public Jira()
         {
-            //log = new Log();
-            log = Log.Instance;
+            log = new Log();
             toggl = new Toggl();
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];
 
-        public int PostJira(User user, InfoWorklog infoWorklog)
+        public RetPostJira PostJira(User user, InfoWorklog infoWorklog)
         {
             string message = string.Empty;
             try
@@ -43,6 +42,7 @@ namespace TogglJiraConsole.JiraModel
                     var token = user.xTokenJira;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                     HttpResponseMessage response = client.PostAsJsonAsync(URI, param).Result;
+                    Thread.Sleep(1000);
                     if (response.IsSuccessStatusCode)
                     {
                         message = $"Jira - Registro de trabalho foi inserido com sucesso.";
@@ -52,23 +52,8 @@ namespace TogglJiraConsole.JiraModel
 
                         message = $"Verificando se hora de inicio da atividade está correta.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                       
-                        var iTimeStarted = PutTimeStarted(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
-                        if (iTimeStarted == 0)
-                        {
-                            message = $"Tentando deletar o horário inserido anteriormente.";
-                            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                            
-                            var iDeleteWorklog = DeleteWorklog(user: user, worklogPost: returnValue, infoWorklog: infoWorklog);
-                        }
-                        else
-                        {
-                            message = $"Tentando retirar as tags pendentes do toggl referente.";
-                            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                            
-                            var iToggl = toggl.PutTogglTags(user: user, infoWorklog: infoWorklog);
-                            Thread.Sleep(1000);
-                        }
+
+                        return new RetPostJira() { bError = false, worklogPost = returnValue };
 
                     }
                     else
@@ -82,11 +67,13 @@ namespace TogglJiraConsole.JiraModel
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
                         message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-                        
+
+                        return new RetPostJira() { bError = true };
+
                     }
 
                 }
-                return 1;
+                
             }
             catch (Exception ex)
             {
@@ -94,8 +81,8 @@ namespace TogglJiraConsole.JiraModel
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
                 message = $"Jira - Ocorreu algum erro ao inserir o Registro de trabalho: {ex.GetAllMessages()}";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-                
-                return 0;
+
+                return new RetPostJira() { bError = true };
 
             }
 
@@ -113,6 +100,7 @@ namespace TogglJiraConsole.JiraModel
                     var token = user.xTokenJira;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                     var response = client.DeleteAsync(URI).Result;
+                    Thread.Sleep(1000);
                     if (response.IsSuccessStatusCode)
                     {
                         message = $"O horário foi deletado com sucesso";
@@ -157,47 +145,40 @@ namespace TogglJiraConsole.JiraModel
                 using (var client = new HttpClient())
                 {
 
-                    if (worklogPost.started != infoWorklog.dtStarted)
-                    {
-                        message = $"Jira - Horario de início do Registro de trabalho está incorreto. Horário inserido: {infoWorklog.dtStarted} - Horário retornado: {worklogPost.started}";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                        message = $"Atualizando o horário de início do Registro de trabalho.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                        
-                        var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, worklogPost.id);
-                        var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
-                        startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
-                        var paramPut = new { started = startedAux };
-                        var token = user.xTokenJira;
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
-                        var response = client.PutAsJsonAsync(URI, paramPut).Result;
-                        if (response.IsSuccessStatusCode)
-                        {
-                            message = $"Horario atualizado com sucesso.";
-                            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                            
-                            return 1;
-                        }
-                        else
-                        {
-                            var ret = response.Content.ReadAsStringAsync().Result;
-                            int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                            int pTo = ret.LastIndexOf("</h1>");
-                            String result = ret.Substring(pFrom, pTo - pFrom);
-
-                            message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.";
-                            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                            message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}";
-                            log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-                            
-                            return 0;
-                        }
-                    }
-
-                    message = $"Horario não está incorreto.";
+                    message = $"Jira - Horario de início do Registro de trabalho está incorreto. Horário inserido: {infoWorklog.dtStarted} - Horário retornado: {worklogPost.started}";
                     log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                    
-                    return 1;
+                    message = $"Atualizando o horário de início do Registro de trabalho.";
+                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+                    var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, worklogPost.id);
+                    var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
+                    startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
+                    var paramPut = new { started = startedAux };
+                    var token = user.xTokenJira;
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
+                    var response = client.PutAsJsonAsync(URI, paramPut).Result;
+                    Thread.Sleep(1000);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        message = $"Horario atualizado com sucesso.";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+                        return 1;
+                    }
+                    else
+                    {
+                        var ret = response.Content.ReadAsStringAsync().Result;
+                        int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
+                        int pTo = ret.LastIndexOf("</h1>");
+                        String result = ret.Substring(pFrom, pTo - pFrom);
+
+                        message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho.";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                        message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho. StatusCode: {(int)response.StatusCode}. Message: {result}";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+
+                        return 0;
+                    }
                 }
             }
             catch (Exception ex)

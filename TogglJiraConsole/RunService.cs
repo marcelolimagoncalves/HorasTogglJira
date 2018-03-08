@@ -23,8 +23,7 @@ namespace TogglJiraConsole
         private Jira jira;
         public RunService()
         {
-            //log = new Log();
-            log = Log.Instance;
+            log = new Log();
             xml = new ArquivoXml();
             usuarios = xml.LerArqUsuarios();
             toggl = new Toggl();
@@ -35,7 +34,6 @@ namespace TogglJiraConsole
         public void Run()
         {
             string message = string.Empty;
-            //running = true;
             var TimeEndRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeEndRun"], "HH:mm", CultureInfo.InvariantCulture);
             var dataFim = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeEndRun.Hour,
                 minute: TimeEndRun.Minute, second: TimeEndRun.Second);
@@ -64,16 +62,21 @@ namespace TogglJiraConsole
 
                         message = $"Buscando as horas lançadas no toggl.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-                        
-                        var toggls = toggl.GetToggl(user: usu);
 
-                        message = $"Toggl - Foram encontrados {toggls.Count()} Registros de trabalho.";
+                        var retUserToggl = toggl.GetUserToggl(user: usu);
+                        var retWorkspaceTags = toggl.GetWorkspaceTags(user: retUserToggl.userToggl, xTokenToggl: usu.XTokenToggl);
+                        var retGetDetailedReport = toggl.GetDetailedReport(user: retUserToggl.userToggl, 
+                            xIdTagsPendente: retWorkspaceTags.xIdTagsPendente, xTokenToggl: usu.XTokenToggl);
+                        var toggls = toggl.ConverterParaInfoWorklog(lDt: retGetDetailedReport.lDatum);
+
+                        message = $"Toggl - Foram encontrados {toggls.infoWorklog.Count()} Registros de trabalho.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
                         
                         var cont = 1;
-                        if (toggls.Count() > 0)
+                        var contError = 0;
+                        if (toggls.infoWorklog.Count() > 0)
                         {
-                            foreach (var t in toggls)
+                            foreach (var t in toggls.infoWorklog)
                             {
                                 if (DateTime.Now >= dataFim)
                                 {
@@ -87,29 +90,32 @@ namespace TogglJiraConsole
                                 message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
                                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
                                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
-                                //log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
-                                var iJira = jira.PostJira(user: usu, infoWorklog: t);
-                                Thread.Sleep(1000);
 
-                                //if (lError.Count() > 0)
-                                //{
-                                //    LogArqErros.Info(LogInfoJira);
-                                //    foreach (var i in lError)
-                                //    {
-                                //        LogArqErros.Error(i);
-                                //    }
+                                var retPostJira = jira.PostJira(user: usu, infoWorklog: t);
+                                if (retPostJira.bError == true) contError++;
 
-                                //    lError.Clear();
-                                //}
-                                //else
-                                //{
+                                if (retPostJira.worklogPost.started != t.dtStarted)
+                                {
+                                    var iTimeStarted = jira.PutTimeStarted(user: usu, worklogPost: retPostJira.worklogPost, infoWorklog: t);
+                                    if (iTimeStarted == 0) contError++;
 
-                                //}
+                                    if (iTimeStarted == 0)
+                                    {
+                                        message = $"Tentando deletar o horário inserido anteriormente.";
+                                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                                //LogArqSucesso.Info(LogInfoJira);
-                                //LogArqSucesso.Info($"Jira - Registro de trabalho foi inserido com sucesso.");
+                                        var iDeleteWorklog = jira.DeleteWorklog(user: usu, worklogPost: retPostJira.worklogPost, infoWorklog: t);
+                                        if (iDeleteWorklog == 0) contError++;
+                                    }
+                                }
+                               
+                                message = $"Tentando retirar as tags pendentes do toggl referente.";
+                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                                if(log.countErros <= 0)
+                                var iToggl = toggl.PutTogglTags(user: usu, infoWorklog: t);
+                                if (iToggl == 0) contError++;
+
+                                if (contError <= 0)
                                 {
                                     log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
                                     message = $"Jira - Registro de trabalho foi inserido com sucesso.";

@@ -56,7 +56,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JiraModel\RetPostJira.cs" />
+    <Compile Include="ToggModel\RetConverterParaInfoWorklog.cs" />
     <Compile Include="Service-bkp.cs" />
+    <Compile Include="ToggModel\RetGetDetailedReport.cs" />
+    <Compile Include="ToggModel\RetGetUserToggl.cs" />
+    <Compile Include="ToggModel\RetGetWorkspaceTags.cs" />
     <Compile Include="XmlModel\ArquivoXml.cs" />
     <Compile Include="ToggModel\DetailedReport.cs" />
     <Compile Include="UtilModel\ExceptionMessages.cs" />

@@ -12,8 +12,7 @@ namespace TogglJiraConsole.UtilModel
         private Log log;
         public Util()
         {
-            //log = new Log();
-            log = Log.Instance;
+            log = new Log();
         }
 
         public string MilisecondsToJiraFormat(int mili)

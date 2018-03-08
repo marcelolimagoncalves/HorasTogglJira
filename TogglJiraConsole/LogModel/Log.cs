@@ -10,19 +10,6 @@ namespace TogglJiraConsole.LogModel
     
     public class Log
     {
-        private static Log instance;
-        public static Log Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new Log();
-                }
-                return instance;
-            }
-        }
-
         /// <summary>
         /// Instância para registro de logs.
         /// </summary>
@@ -30,7 +17,7 @@ namespace TogglJiraConsole.LogModel
         private static Logger LogArqErro = LogManager.GetLogger("ArquivoUserErros");
         private static Logger LogArqSucesso = LogManager.GetLogger("ArquivoUserSucesso");
 
-        private Log()
+        public Log()
         {
             lLogArqPrincipal = new List<LogInfo>();
             lLogArqErro = new List<LogInfo>();

@@ -16,8 +16,7 @@ namespace TogglJiraConsole.XmlModel
         private Log log;
         public ArquivoXml()
         {
-            //log = new Log();
-            log = Log.Instance;
+            log = new Log();
         }
         public TagsPendente LerArqTagsPendente()
         {
