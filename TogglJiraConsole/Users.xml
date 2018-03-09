@@ -15,18 +15,18 @@
   </User>-->
   
   <!--alessandro teste casa-->
-  <User> 
+  <!--<User> 
     <xNome>Alessandro Marcelino</xNome>
     <xTokenToggl>983ba215981e739865b829ce02e3a8ed</xTokenToggl>
     <xTokenJira>YWxlc3NhbmRyby5tYXJjZWxpbm86MXFhenhzdzJA</xTokenJira>
-  </User>
+  </User>-->
   
   <!--Alessandro oficial transdata-->
-  <!--<User>
+  <User>
     <xNome>Alessandro Marcelino</xNome>
     <xTokenToggl>9c4e893a14c215cc3e2407c74da7b478</xTokenToggl>
     <xTokenJira>YWxlc3NhbmRyby5tYXJjZWxpbm86d29sdmVyaW5l</xTokenJira>
-  </User>-->
+  </User>
 </Users>
 
 
