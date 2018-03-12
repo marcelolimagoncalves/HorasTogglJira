@@ -56,7 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RequisicaoHttp.cs" />
     <Compile Include="JiraModel\RetPostJira.cs" />
+    <Compile Include="Retorno.cs" />
     <Compile Include="TogglModel\RetConverterParaInfoWorklog.cs" />
     <Compile Include="Service-bkp.cs" />
     <Compile Include="TogglModel\RetGetDetailedReport.cs" />
@@ -94,7 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TagsPendente.xml" />
-    <Content Include="Users.xml" />
+    <Content Include="Users.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

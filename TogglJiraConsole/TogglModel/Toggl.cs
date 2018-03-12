@@ -20,18 +20,21 @@ namespace TogglJiraConsole.TogglModel
         private Log log;
         private Util util;
         private ArquivoXml xml;
+        private RequisicaoHttp requisicaoHttp;
         public Toggl()
         {
             log = new Log();
             util = new Util();
             xml = new ArquivoXml();
+            requisicaoHttp = new RequisicaoHttp();
         }
 
         private static string UrlBaseToggl = ConfigurationManager.AppSettings["UrlBaseToggl"];
 
-        public RetConverterParaInfoWorklog ConverterParaInfoWorklog(List<Datum> lDt)
+        public Retorno<List<InfoWorklog>> ConverterParaInfoWorklog(List<Datum> lDt)
         {
-            string message = string.Empty;
+            var retorno = new Retorno<List<InfoWorklog>>(tipo: new List<InfoWorklog>(), erros: new List<LogInfo>());
+            string message;
             try
             {
                 List<InfoWorklog> lToggl = new List<InfoWorklog>();
@@ -65,219 +68,161 @@ namespace TogglJiraConsole.TogglModel
 
                     lToggl.Add(infoWorklog);
                 }
-                return new RetConverterParaInfoWorklog() { bError = false, infoWorklog = lToggl};
+
+                retorno.obj = lToggl;
+                return retorno;
             }
             catch (Exception ex)
             {
                 message = $"Toggl - Algum erro aconteceu ao converter os dados para o formato Jira.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                
                 message = $"Toggl - Algum erro aconteceu ao converter os dados para o formato Jira: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                return new RetConverterParaInfoWorklog() { bError = true };
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
             }
 
         }
 
-        public RetGetUserToggl GetUserToggl(User user)
+        public Retorno<UserToggl> GetUserToggl(User user)
         {
+            var retorno = new Retorno<UserToggl>(tipo: new UserToggl(), erros: new List<LogInfo>());
             string message;
             try
             {
-                using (var client = new HttpClient())
+                var url = $"/api/v8/me";
+                var token = user.XTokenToggl;
+                var ret = requisicaoHttp.ExecReqToggl(tipo: new UserToggl(), url: url, token: token, 
+                    metodoHttp: MetodoHttp.GetAsync, param: new object());
+                if (!ret.bError)
                 {
-                    var URI = String.Format("{0}/api/v8/me", UrlBaseToggl);
-                    var tokenAux = String.Format("{0}:api_token", user.XTokenToggl);
-                    var tokenBytes = System.Text.Encoding.UTF8.GetBytes(tokenAux);
-                    var token = Convert.ToBase64String(tokenBytes);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
-                    var result = client.GetAsync(URI).Result;
-                    var retUserToggl = result.Content.ReadAsAsync<UserToggl>().Result;
-                    Thread.Sleep(1000);
-                    if (result.IsSuccessStatusCode)
-                    {
-
-                        message = $"Usuário buscado com sucesso";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                        return new RetGetUserToggl() { bError = false, userToggl = retUserToggl };
-                    }
-                    else
-                    {
-                        var ret = result.Content.ReadAsStringAsync().Result;
-                        int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                        int pTo = ret.LastIndexOf("</h1>");
-                        String xRet = ret.Substring(pFrom, pTo - pFrom);
-
-                        message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                        message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário. StatusCode: {(int)result.StatusCode}. Message: {xRet}";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                        return new RetGetUserToggl() { bError = true };
-                    }
-
+                    retorno.obj = ret.obj;
                 }
+                else
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
+                return retorno;
             }
             catch (Exception ex)
             {
-                message = $"Toggl - Ocorreu algum erro ao atualizar ao buscar as informações do usuário.";
+                message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+               
                 message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                return new RetGetUserToggl() { bError = true };
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
             }
-            
+
         }
 
-        public RetGetWorkspaceTags GetWorkspaceTags(UserToggl user, string xTokenToggl, TagsPendente tagsPendentes)
+        public Retorno<string> GetWorkspaceTags(UserToggl user, string xTokenToggl, TagsPendente tagsPendentes)
         {
+            var retorno = new Retorno<string>(tipo: string.Empty, erros: new List<LogInfo>());
             string message;
             try
             {
-                using (var client = new HttpClient())
+
+                var url = $"/api/v8/workspaces/{user.data.default_wid}/tags";
+                var token = xTokenToggl;
+                var ret = requisicaoHttp.ExecReqToggl(tipo: new List<WorkspaceTags>(), url: url, token: token,
+                    metodoHttp: MetodoHttp.GetAsync, param: new object());
+                if (!ret.bError)
                 {
-                    var URI = String.Format("{0}/api/v8/workspaces/{1}/tags", UrlBaseToggl, user.data.default_wid);
-                    var tokenAux = String.Format("{0}:api_token", xTokenToggl);
-                    var tokenBytes = System.Text.Encoding.UTF8.GetBytes(tokenAux);
-                    var token = Convert.ToBase64String(tokenBytes);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
-                    var result = client.GetAsync(URI).Result;
-                    List<WorkspaceTags> retWorkspaceTags = result.Content.ReadAsAsync<List<WorkspaceTags>>().Result;
-                    Thread.Sleep(1000);
-                    if (result.IsSuccessStatusCode)
+                    string xidTagsPendente = string.Empty;
+                    if (ret.obj.Count() > 0)
                     {
-                        string xidTagsPendente = string.Empty;
-                        if (retWorkspaceTags.Count > 0)
-                        {
-                            var idTagsPendente = retWorkspaceTags.Where(i => tagsPendentes.Tag.Contains(i.name.ToUpper()))
-                                .Select(i => i.id).ToArray();
-                            xidTagsPendente = String.Join(",", idTagsPendente);
-                        }
-
-                        message = $"Tags foram buscadas com sucesso sucesso";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                        return new RetGetWorkspaceTags() { bError = false, xIdTagsPendente = xidTagsPendente };
-                    }
-                    else
-                    {
-                        var ret = result.Content.ReadAsStringAsync().Result;
-                        int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                        int pTo = ret.LastIndexOf("</h1>");
-                        String xRet = ret.Substring(pFrom, pTo - pFrom);
-
-                        message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                        message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes. StatusCode: {(int)result.StatusCode}. Message: {xRet}";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                        return new RetGetWorkspaceTags() { bError = true };
+                        var idTagsPendente = ret.obj.Where(i => tagsPendentes.Tag.Contains(i.name.ToUpper()))
+                               .Select(i => i.id).ToArray();
+                        xidTagsPendente = String.Join(",", idTagsPendente);
                     }
 
+                    message = $"Tags foram buscadas com sucesso sucesso.";
+                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+                    retorno.obj = xidTagsPendente;
                 }
+                else
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
+                return retorno;
             }
             catch (Exception ex)
             {
-                message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.";
+                message = $"Toggl - Ocorreu algum erro ao buscar as informações das tags pendentes.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                return new RetGetWorkspaceTags() { bError = true };
+               
+                message = $"Toggl - Ocorreu algum erro ao buscar as informações das tags pendentes: {ex.GetAllMessages()}";
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
             }
         }
 
-        public RetGetDetailedReport GetDetailedReport(UserToggl user, string xIdTagsPendente, string xTokenToggl)
+        public Retorno<List<Datum>> GetDetailedReport(UserToggl user, string xIdTagsPendente, string xTokenToggl)
         {
+            var retorno = new Retorno<List<Datum>>(tipo: new List<Datum>(), erros: new List<LogInfo>());
             string message;
             try
             {
-
                 var since = DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd");
                 var until = DateTime.Now.ToString("yyyy-MM-dd");
-                if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["since"]) && !string.IsNullOrEmpty(ConfigurationManager.AppSettings["until"]))
+                var configSince = ConfigurationManager.AppSettings["since"];
+                var configUntil = ConfigurationManager.AppSettings["until"];
+                if (!string.IsNullOrEmpty(configSince) && !string.IsNullOrEmpty(configUntil))
                 {
-                    since = ConfigurationManager.AppSettings["since"];
-                    until = ConfigurationManager.AppSettings["until"];
+                    since = configSince;
+                    until = configUntil;
                 }
-
-                using (var client = new HttpClient())
+                
+                var contPage = 1;
+                List<Datum> lData = new List<Datum>();
+                var url = $"/reports/api/v2/details?user_agent={user.data.email}&workspace_id={user.data.default_wid}&tag_ids={xIdTagsPendente}&since={since}&until={until}&page={contPage}";
+                var token = xTokenToggl;
+                var ret = requisicaoHttp.ExecReqToggl(tipo: new DetailedReport(), url: url, token: token,
+                    metodoHttp: MetodoHttp.GetAsync, param: new object());
+                if (!ret.bError)
                 {
-                    var contPage = 1;
-                    List<Datum> ldata = new List<Datum>();
-                    var URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}&page={6}",
-                        UrlBaseToggl, user.data.email, user.data.default_wid, xIdTagsPendente, since, until, contPage);
-                    var tokenAux = String.Format("{0}:api_token", xTokenToggl);
-                    var tokenBytes = System.Text.Encoding.UTF8.GetBytes(tokenAux);
-                    var token = Convert.ToBase64String(tokenBytes);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
-                    var result = client.GetAsync(URI).Result;
-                    Thread.Sleep(1000);
-                    if (result.IsSuccessStatusCode)
+                    lData.AddRange(ret.obj.data);
+
+                    while (lData.Count < ret.obj.total_count)
                     {
-                        var retDetailedReport = result.Content.ReadAsAsync<DetailedReport>().Result;
-                        Thread.Sleep(1000);
-                        ldata.AddRange(retDetailedReport.data.OrderBy(i => i.start).ToList());
-                        while (ldata.Count < retDetailedReport.total_count)
+                        contPage++;
+                        url = $"/reports/api/v2/details?user_agent={user.data.email}&workspace_id={user.data.default_wid}&tag_ids={xIdTagsPendente}&since={since}&until={until}&page={contPage}";
+                        ret = requisicaoHttp.ExecReqToggl(tipo: new DetailedReport(), url: url, token: token,
+                            metodoHttp: MetodoHttp.GetAsync, param: new object());
+                        if (!ret.bError)
                         {
-                            contPage++;
-                            URI = String.Format("{0}/reports/api/v2/details?user_agent={1}&workspace_id={2}&tag_ids={3}&since={4}&until={5}&page={6}",
-                            UrlBaseToggl, user.data.email, user.data.default_wid, xIdTagsPendente, since, until, contPage);
-                            result = client.GetAsync(URI).Result;
-                            Thread.Sleep(1000);
-                            if (result.IsSuccessStatusCode)
-                            {
-                                retDetailedReport = result.Content.ReadAsAsync<DetailedReport>().Result;
-                                ldata.AddRange(retDetailedReport.data.OrderBy(i => i.start).ToList());
-                            }
-                            else
-                            {
-                                var ret = result.Content.ReadAsStringAsync().Result;
-                                int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                                int pTo = ret.LastIndexOf("</h1>");
-                                String xRet = ret.Substring(pFrom, pTo - pFrom);
-
-                                message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho.";
-                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                                message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho. StatusCode: {(int)result.StatusCode}. Message: {xRet}";
-                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                                return new RetGetDetailedReport() { bError = true };
-                            }
-
+                            lData.AddRange(ret.obj.data);
                         }
-
-                        message = $"Toggl - Os detalhes dos registros de trabalho foram buscados com sucesso.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                        return new RetGetDetailedReport() { bError = false, lDatum = ldata };
+                        else
+                        {
+                            retorno.lErros.AddRange(ret.lErros);
+                        }
                     }
-                    else
-                    {
-                        var ret = result.Content.ReadAsStringAsync().Result;
-                        int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                        int pTo = ret.LastIndexOf("</h1>");
-                        String xRet = ret.Substring(pFrom, pTo - pFrom);
 
-                        message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                        message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho. StatusCode: {(int)result.StatusCode}. Message: {xRet}";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                    message = $"Toggl - Os detalhes dos registros de trabalho foram buscados com sucesso.";
+                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                        return new RetGetDetailedReport() { bError = true };
-                    }
+                    retorno.obj = lData.OrderBy(i => i.start).ToList();
                 }
+                else
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
+                return retorno;
             }
             catch (Exception ex)
             {
                 message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                
                 message = $"Toggl - Ocorreu algum erro ao buscar os Registros de trabalho: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                return new RetGetDetailedReport() { bError = true };
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
             }
         }
 

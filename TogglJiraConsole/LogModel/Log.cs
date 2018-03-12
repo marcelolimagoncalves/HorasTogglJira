@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TogglJiraConsole.LogModel
 {
-    
+
     public class Log
     {
         /// <summary>
@@ -48,7 +48,7 @@ namespace TogglJiraConsole.LogModel
                 case ArqLog.Sucesso:
                     lLogArqSucesso.Add(new LogInfo() { mensagem = message, logLevel = logLevel });
                     break;
-            }          
+            }
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace TogglJiraConsole.LogModel
                     break;
             }
 
-            
+
         }
 
         public void EscreverArqLog(LogInfo logInfo, ArqLog arqLog)
@@ -172,12 +172,20 @@ namespace TogglJiraConsole.LogModel
                     break;
             }
 
-            
+
         }
     }
 
     public class LogInfo
     {
+        public DateTime dtLog { get; set; }
+        public string dtLogFormatado
+        {
+            get
+            {
+                return dtLog.ToString("hh:MM:ss");
+            }
+        }
         public string mensagem { get; set; }
         public LogLevel logLevel { get; set; }
     }

@@ -18,62 +18,56 @@ namespace TogglJiraConsole.XmlModel
         {
             log = new Log();
         }
-        public TagsPendente LerArqTagsPendente()
+       
+        public Retorno<TagsPendente> LerArqTagsPendente()
         {
-            try
-            {
-                string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
-                caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
-                caminhoArquivo += @"\TagsPendente.xml";
+            var message = $"Buscando os tags no arquivo TagsPendente.xml.";
+            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                XmlSerializer ser = new XmlSerializer(typeof(TagsPendente));
-                TextReader textReader = (TextReader)new StreamReader(caminhoArquivo);
-                XmlTextReader reader = new XmlTextReader(textReader);
-                reader.Read();
-
-                TagsPendente tags = (TagsPendente)ser.Deserialize(reader);
-
-                tags.Tag = tags.Tag.ConvertAll(d => d.ToUpper());
-
-                return tags;
-            }
-            catch (Exception ex)
-            {
-                string message = $"Tags - Algum erro aconteceu na leitura das tags pendentes.";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                message = $"Tags - Algum erro aconteceu na leitura das tags pendentes: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-                
-                return new TagsPendente();
-            }
-
+            var ret = LerArquivo(tipo: new TagsPendente(), nomeArq: @"\TagsPendente.xml");
+            ret.obj.Tag = ret.obj.Tag.ConvertAll(d => d.ToUpper());
+            return ret;
         }
 
-        public Users LerArqUsuarios()
+        public Retorno<Users> LerArqUsuarios()
         {
+            var message = $"Buscando os usuários no arquivo Users.xml.";
+            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+            var ret = LerArquivo(tipo: new Users(), nomeArq: @"\Users.xml");
+            return ret;
+        }
+        public Retorno<T> LerArquivo<T>(T tipo, string nomeArq)
+        {
+            var ret = Activator.CreateInstance<T>();
+            var retorno = new Retorno<T>(tipo: ret, erros: new List<LogInfo>());
             try
             {
+
                 string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
                 caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
-                caminhoArquivo += @"\Users.xml";
+                caminhoArquivo += nomeArq;
 
-                XmlSerializer ser = new XmlSerializer(typeof(Users));
+                XmlSerializer ser = new XmlSerializer(typeof(T));
                 TextReader textReader = (TextReader)new StreamReader(caminhoArquivo);
                 XmlTextReader reader = new XmlTextReader(textReader);
                 reader.Read();
 
-                Users usu = (Users)ser.Deserialize(reader);
+                ret = (T)ser.Deserialize(reader);
+                retorno.obj = ret;
 
-                return usu;
+                return retorno;
             }
             catch (Exception ex)
             {
-                string message = $"Usuarios - Algum erro aconteceu na leitura dos usuarios.";
+                string message = $"Algum erro aconteceu na leitura do arquivo xml.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                message = $"Usuarios - Algum erro aconteceu na leitura dos usuarios: {ex.GetAllMessages()}";
+                message = $"Algum erro aconteceu na leitura do arquivo xml: {ex.GetAllMessages()}";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
 
-                return new Users();
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message});
+
+                return retorno;
             }
 
         }
