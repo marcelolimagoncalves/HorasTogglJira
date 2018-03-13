@@ -165,31 +165,49 @@ namespace TogglJiraConsole
 
                                 if (worklogPost.started != t.dtStarted)
                                 {
-                                    var iTimeStarted = jira.PutTimeStarted(user: usu, worklogPost: worklogPost, infoWorklog: t);
-                                    if (iTimeStarted == 0) contError++;
+                                    message = $"Jira - Horario de início do Registro de trabalho está incorreto. Horário inserido: {t.dtStarted} - Horário retornado: {worklogPost.started}";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+                                    message = $"Jira - Atualizando o horário de início do Registro de trabalho.";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                                    if (iTimeStarted == 0)
+                                    var retPutTimeStarted = jira.PutTimeStarted(user: usu, worklogPost: worklogPost, infoWorklog: t);
+                                    if (!retPutTimeStarted.bError)
                                     {
-                                        message = $"Tentando deletar o horário inserido anteriormente.";
+                                        worklogPost = retPutTimeStarted.obj;
+                                    }
+                                    else
+                                    {
+                                        lErros.AddRange(retPutTimeStarted.lErros);
+
+                                        message = $"Jira - Tentando deletar o horário inserido.";
                                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                                        var iDeleteWorklog = jira.DeleteWorklog(user: usu, worklogPost: worklogPost, infoWorklog: t);
-                                        if (iDeleteWorklog == 0) contError++;
+                                        var retDeleteWorklog = jira.DeleteWorklog(user: usu, worklogPost: worklogPost, infoWorklog: t);
+                                        if (!retDeleteWorklog.bError)
+                                        {
+                                            worklogPost = retDeleteWorklog.obj;
+                                        }
+                                        else
+                                        {
+                                            lErros.AddRange(retDeleteWorklog.lErros);
+                                        }
                                     }
                                 }
                                
                                 message = $"Tentando retirar as tags pendentes do toggl referente.";
                                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                                var iToggl = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
-                                if (iToggl == 0) contError++;
-
-                                if (contError <= 0)
+                                TogglPost togglPost = new TogglPost();
+                                var retPutTogglTags = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
+                                if (!retPutTogglTags.bError)
                                 {
-                                    message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
-                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
+                                    togglPost = retPutTogglTags.obj;
                                 }
-                                
+                                else
+                                {
+                                    lErros.AddRange(retPutTogglTags.lErros);
+                                }
+
                                 cont++;
                             }
 

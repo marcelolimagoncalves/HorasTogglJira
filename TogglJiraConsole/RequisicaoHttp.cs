@@ -155,6 +155,9 @@ namespace TogglJiraConsole
                         case MetodoHttp.PutAsJsonAsync:
                             result = client.PutAsJsonAsync(url, param).Result;
                             break;
+                        case MetodoHttp.DeleteAsync:
+                            result = client.DeleteAsync(url).Result;
+                            break;
                     }
                     
                     Thread.Sleep(1000);
@@ -179,6 +182,7 @@ namespace TogglJiraConsole
     {
         GetAsync,
         PostAsJsonAsync,
-        PutAsJsonAsync
+        PutAsJsonAsync,
+        DeleteAsync
     }
 }

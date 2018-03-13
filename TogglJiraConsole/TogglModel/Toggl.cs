@@ -226,65 +226,39 @@ namespace TogglJiraConsole.TogglModel
             }
         }
 
-        public int PutTogglTags(User user, InfoWorklog infoWorklog, TagsPendente tagsPendentes)
+        public Retorno<TogglPost> PutTogglTags(User user, InfoWorklog infoWorklog, TagsPendente tagsPendentes)
         {
+            var retorno = new Retorno<TogglPost>(tipo: new TogglPost(), erros: new List<LogInfo>());
             string message = string.Empty;
             try
             {
-                using (var client = new HttpClient())
+
+                var url = $"/api/v8/time_entries/{infoWorklog.time_entry_id}";
+                var token = user.XTokenToggl;
+                var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
+                var xTags = String.Join(",", t);
+                var param = new { time_entry = new { tags = t } };
+                var ret = requisicaoHttp.ExecReqToggl(tipo: new TogglPost(), url: url, token: token,
+                    metodoHttp: MetodoHttp.PutAsJsonAsync, param: param);
+                if (!ret.bError)
                 {
-                    
-                    //Toggl
-                    var URIToggl = String.Format("{0}/api/v8/time_entries/{1}", UrlBaseToggl, infoWorklog.time_entry_id);
-                    var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
-                    var xTags = String.Join(",", t);
-                    var paramToggl = new { time_entry = new { tags = t } };
-                    var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
-                    var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
-                    var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
-                    HttpResponseMessage responseToggl = client.PutAsJsonAsync(URIToggl, paramToggl).Result;
-                    Thread.Sleep(1000);
-                    if (responseToggl.IsSuccessStatusCode)
-                    {
-
-                        message = $"Tags excluidas com sucesso";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                        return 1;
-                    }
-                    else
-                    {
-                        var ret = responseToggl.Content.ReadAsStringAsync().Result;
-                        int pFrom = ret.IndexOf("<h1>") + "<h1>".Length;
-                        int pTo = ret.LastIndexOf("</h1>");
-                        String result = ret.Substring(pFrom, pTo - pFrom);
-
-                        message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-
-                        message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
-                        message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes. StatusCode: {(int)responseToggl.StatusCode}. Message: {result}";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                        return 0;
-                    }
-
-
+                    retorno.obj = ret.obj;
                 }
+                else
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
+                return retorno;
             }
             catch (Exception ex)
             {
                 message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
-                message = $"Jira - Inserindo Registro de trabalho: {infoWorklog.key} - {infoWorklog.comment} | {infoWorklog.timeSpent} | {infoWorklog.started} | {infoWorklog.dtStarted} ";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Info);
                 message = $"Toggl - Ocorreu algum erro ao atualizar o Registro de trabalho retirando as tags Pendentes: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-
-                return 0;
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
             }
 
         }

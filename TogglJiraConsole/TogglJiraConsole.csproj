@@ -64,6 +64,7 @@
     <Compile Include="TogglModel\RetGetDetailedReport.cs" />
     <Compile Include="TogglModel\RetGetUserToggl.cs" />
     <Compile Include="TogglModel\RetGetWorkspaceTags.cs" />
+    <Compile Include="TogglModel\TogglPost.cs" />
     <Compile Include="XmlModel\ArquivoXml.cs" />
     <Compile Include="TogglModel\DetailedReport.cs" />
     <Compile Include="UtilModel\ExceptionMessages.cs" />
