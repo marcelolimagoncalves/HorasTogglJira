@@ -11,6 +11,7 @@ namespace TogglJiraConsole.JiraModel
         public string started { get; set; }
         public DateTime dtStarted { get; set; }
         public string timeSpent { get; set; }
+        public int timeSpentSeconds { get; set; }
         public string key { get; set; }
         public string comment { get; set; }
         public int time_entry_id { get; set; }

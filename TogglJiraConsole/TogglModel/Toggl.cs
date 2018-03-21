@@ -63,6 +63,7 @@ namespace TogglJiraConsole.TogglModel
                     var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(data.start)).Replace("\"", "");
                     infoWorklog.started = startedAux.Replace(startedAux.Substring(19), ".000-0300");
                     infoWorklog.timeSpent = util.MilisecondsToJiraFormat(mili: data.dur);
+                    infoWorklog.timeSpentSeconds = data.dur / 1000;
                     infoWorklog.time_entry_id = data.id;
                     infoWorklog.tags = data.tags;
 
