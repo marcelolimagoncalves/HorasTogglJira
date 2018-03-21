@@ -144,7 +144,7 @@ namespace TogglJiraConsole.JiraModel
                     project_id = int.Parse(!string.IsNullOrEmpty(row["project_id"]) ? row["project_id"] : "0");
                 }
 
-                strQuery = $"select ID from jiraissue where project = {project_id} and issueid = {issuenum}";
+                strQuery = $"select ID from jiraissue where project = {project_id} and issuenum = {issuenum}";
 
                 var rows2 = ExecutaComandoComRetorno(strQuery);
                 foreach (var row in rows2)
