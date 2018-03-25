@@ -36,9 +36,11 @@ namespace TogglJiraConsole.JiraModel
             string message = string.Empty;
             try
             {
-                var strUser = Util.Base64Decode(user.xTokenJira);
-                strUser = strUser.Split(':')[0];
-                var ret = dbJira.InserirJira(infoWorklog: infoWorklog, user: strUser);
+                var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog";
+                var token = user.XTokenToggl;
+                var param = new { comment = infoWorklog.comment, started = infoWorklog.started, timeSpent = infoWorklog.timeSpent };
+                var ret = requisicaoHttp.ExecReqJira(tipo: new WorklogPost(), url: url, token: token,
+                    metodoHttp: MetodoHttp.PostAsJsonAsync, param: param);
                 if (!ret.bError)
                 {
                     message = $"Jira - Registro de trabalho foi inserido com sucesso.";
@@ -51,7 +53,7 @@ namespace TogglJiraConsole.JiraModel
                     retorno.lErros.AddRange(ret.lErros);
                 }
 
-                return retorno;                
+                return retorno;
             }
             catch (Exception ex)
             {
