@@ -19,13 +19,13 @@ namespace TogglJiraConsole.JiraModel
         private Log log;
         private Toggl toggl;
         private RequisicaoHttp requisicaoHttp;
-        private DbJiraContext dbJira;
+        //private DbJiraContext dbJira;
         public Jira()
         {
             log = new Log();
             toggl = new Toggl();
             requisicaoHttp = new RequisicaoHttp();
-            dbJira = new DbJiraContext();
+            //dbJira = new DbJiraContext();
         }
 
         static string UrlBaseJira = ConfigurationManager.AppSettings["UrlBaseJira"];

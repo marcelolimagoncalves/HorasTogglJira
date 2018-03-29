@@ -45,6 +45,11 @@ namespace TogglJiraConsole
                 setinterval = false;
             }
 
+            string[] prefixes = new string[1];
+            prefixes[0] = "http://localhost:1300/cadastro/";
+            RequisicaoHttp req = new RequisicaoHttp();
+            req.IniciarServidorHttp(prefixes);
+
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
