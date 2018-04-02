@@ -28,9 +28,11 @@ namespace TogglJiraConsole
         private static bool setinterval = true;
 
         private System.Timers.Timer _timer;
+        private RequisicaoHttp requisicaoHttp;
 
         public Service()
         {
+            requisicaoHttp = new RequisicaoHttp();
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += timer_Elapsed;
         }
@@ -41,20 +43,15 @@ namespace TogglJiraConsole
         {
             if (setinterval)
             {
-                _timer.Interval = 60000;
+                _timer.Interval = 660000;
                 setinterval = false;
             }
-
-            string[] prefixes = new string[1];
-            prefixes[0] = "http://localhost:1300/cadastro/";
-            RequisicaoHttp req = new RequisicaoHttp();
-            req.IniciarServidorHttp(prefixes);
 
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
-            RunService r = new RunService();
-            r.Run();
+            //RunService r = new RunService();
+            //r.Run();
 #else
             if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
             {
@@ -68,13 +65,20 @@ namespace TogglJiraConsole
         }
 
 
-        public void Start()
+        public async Task Start()
         {
+
+            string[] prefixes = new string[1];
+            prefixes[0] = "http://localhost:1300/cadastro/";
+            Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
+           
+           
             _timer.Start();
         }
 
         public void Stop()
         {
+            requisicaoHttp.FecharServidorHttp();
             _timer.Stop();
         }
     }

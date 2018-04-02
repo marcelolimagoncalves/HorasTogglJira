@@ -85,14 +85,14 @@ namespace TogglJiraConsole.TogglModel
 
         }
 
-        public Retorno<UserToggl> GetUserToggl(User user)
+        public Retorno<UserToggl> GetUserToggl(string XTokenToggl)
         {
             var retorno = new Retorno<UserToggl>(tipo: new UserToggl(), erros: new List<LogInfo>());
             string message;
             try
             {
                 var url = $"/api/v8/me";
-                var token = user.XTokenToggl;
+                var token = XTokenToggl;
                 var ret = requisicaoHttp.ExecReqToggl(tipo: new UserToggl(), url: url, token: token, 
                     metodoHttp: MetodoHttp.GetAsync, param: new object());
                 if (!ret.bError)

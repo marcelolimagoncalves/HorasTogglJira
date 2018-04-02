@@ -37,7 +37,7 @@ namespace TogglJiraConsole.JiraModel
             try
             {
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog";
-                var token = user.XTokenToggl;
+                var token = user.xTokenJira;
                 var param = new { comment = infoWorklog.comment, started = infoWorklog.started, timeSpent = infoWorklog.timeSpent };
                 var ret = requisicaoHttp.ExecReqJira(tipo: new WorklogPost(), url: url, token: token,
                     metodoHttp: MetodoHttp.PostAsJsonAsync, param: param);
@@ -76,7 +76,7 @@ namespace TogglJiraConsole.JiraModel
             {
 
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog/{worklogPost.id}";
-                var token = user.XTokenToggl;
+                var token = user.xTokenJira;
                 var ret = requisicaoHttp.ExecReqJira(tipo: new WorklogPost(), url: url, token: token,
                     metodoHttp: MetodoHttp.DeleteAsync, param: new object());
                 if (!ret.bError)
@@ -112,7 +112,7 @@ namespace TogglJiraConsole.JiraModel
             try
             {
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog/{worklogPost.id}";
-                var token = user.XTokenToggl;
+                var token = user.xTokenJira;
                 var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
                 startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
                 var param = new { started = startedAux };
@@ -139,6 +139,43 @@ namespace TogglJiraConsole.JiraModel
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
                 message = $"Jira - Ocorreu algum erro ao atualizar o horário de início do Registro de trabalho: {ex.GetAllMessages()}";
+                retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
+                return retorno;
+            }
+
+        }
+
+        public Retorno<MySelf> GetUser(string xTokenJira)
+        {
+            var retorno = new Retorno<MySelf>(tipo: new MySelf(), erros: new List<LogInfo>());
+            string message = string.Empty;
+            try
+            {
+
+                var url = $"/rest/api/2/myself";
+                var token = xTokenJira;
+                var ret = requisicaoHttp.ExecReqJira(tipo: new MySelf(), url: url, token: token,
+                    metodoHttp: MetodoHttp.DeleteAsync, param: new object());
+                if (!ret.bError)
+                {
+                    message = $"Jira - Registro de trabalho foi deletado com sucesso.";
+                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
+
+                    retorno.obj = ret.obj;
+                }
+                else
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
+                return retorno;
+            }
+            catch (Exception ex)
+            {
+                message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho.";
+                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+
+                message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {ex.GetAllMessages()}";
                 retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
                 return retorno;
             }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.LogModel;
 using TogglJiraConsole.TogglModel;
+using TogglJiraConsole.UserModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
 
@@ -23,6 +24,7 @@ namespace TogglJiraConsole
         private Toggl toggl;
         private Jira jira;
         private List<LogInfo> lErros;
+        private UserDbContext userDbContext;
         public RunService()
         {
             lErros = new List<LogInfo>();
@@ -30,8 +32,12 @@ namespace TogglJiraConsole
             xml = new ArquivoXml();
             toggl = new Toggl();
             jira = new Jira();
+            userDbContext = new UserDbContext();
             var retUsu = xml.LerArqUsuarios();
-            if(!retUsu.bError)
+            //var retornoUsers = userDbContext.BuscarUsuarios();
+            //var usu = new List<User>();
+            //var retUsu = userDbContext.BuscarUsuarios();
+            if (!retUsu.bError)
             {
                 usuarios = retUsu.obj;
             }
@@ -83,7 +89,7 @@ namespace TogglJiraConsole
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
                         UserToggl userToggl = new UserToggl();
-                        var retUserToggl = toggl.GetUserToggl(user: usu);
+                        var retUserToggl = toggl.GetUserToggl(XTokenToggl: usu.XTokenToggl);
                         if (!retUserToggl.bError)
                         {
                             userToggl = retUserToggl.obj;
