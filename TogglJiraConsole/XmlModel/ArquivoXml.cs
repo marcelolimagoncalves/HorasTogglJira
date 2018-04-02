@@ -29,14 +29,14 @@ namespace TogglJiraConsole.XmlModel
             return ret;
         }
 
-        public Retorno<Users> LerArqUsuarios()
-        {
-            var message = $"Buscando os usuários no arquivo Users.xml.";
-            log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+        //public Retorno<Users> LerArqUsuarios()
+        //{
+        //    var message = $"Buscando os usuários no arquivo Users.xml.";
+        //    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-            var ret = LerArquivo(tipo: new Users(), nomeArq: @"\Users.xml");
-            return ret;
-        }
+        //    var ret = LerArquivo(tipo: new Users(), nomeArq: @"\Users.xml");
+        //    return ret;
+        //}
         public Retorno<T> LerArquivo<T>(T tipo, string nomeArq)
         {
             var ret = Activator.CreateInstance<T>();

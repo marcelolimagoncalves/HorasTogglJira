@@ -17,6 +17,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.TogglModel;
+using TogglJiraConsole.UserModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
 
@@ -82,17 +83,17 @@ namespace TogglJiraConsole
 
                 Log.Debug("Buscando os usuários no arquivo Users.xml");
                 var usuarios = GetUsuarios();
-                if (usuarios.User.Count() > 0)
+                if (usuarios.Count() > 0)
                 {
-                    foreach (var usu in usuarios.User)
+                    foreach (var usu in usuarios)
                     {
-                        Log.Debug($"Iniciando a sincronização do usuário {usu.XNome}");
+                        Log.Debug($"Iniciando a sincronização do usuário {usu.xNome}");
                         if (parar == true)
                         {
                             break;
                         }
 
-                        Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
+                        Environment.SetEnvironmentVariable("CLIENT_NAME", usu.xNome);
                         Log.Info("Iniciando a sincronização");
                         
                         Log.Debug($"Buscando as horas lançadas no toggl");
@@ -158,7 +159,7 @@ namespace TogglJiraConsole
                 {
                     //Toggl
                     var URI = String.Format("{0}/api/v8/me", UrlBaseToggl);
-                    var tokenAux = String.Format("{0}:api_token", user.XTokenToggl);
+                    var tokenAux = String.Format("{0}:api_token", user.xTogglToken);
                     var tokenBytes = System.Text.Encoding.UTF8.GetBytes(tokenAux);
                     var token = Convert.ToBase64String(tokenBytes);
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
@@ -265,7 +266,7 @@ namespace TogglJiraConsole
                     //Jira
                     var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog", UrlBaseJira, infoWorklog.key);
                     var param = new { comment = infoWorklog.comment, started = infoWorklog.started, timeSpent = infoWorklog.timeSpent };
-                    var token = user.xTokenJira;
+                    var token = user.xJiraToken;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                     HttpResponseMessage response = client.PostAsJsonAsync(URI, param).Result;
                     if (response.IsSuccessStatusCode)
@@ -324,7 +325,7 @@ namespace TogglJiraConsole
                 {
 
                     var URI = String.Format("{0}/rest/api/2/issue/{1}/worklog/{2}", UrlBaseJira, infoWorklog.key, worklogPost.id);
-                    var token = user.xTokenJira;
+                    var token = user.xJiraToken;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                     var response = client.DeleteAsync(URI).Result;
                     if (response.IsSuccessStatusCode)
@@ -371,7 +372,7 @@ namespace TogglJiraConsole
                         var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
                         startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
                         var paramPut = new { started = startedAux };
-                        var token = user.xTokenJira;
+                        var token = user.xJiraToken;
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
                         var response = client.PutAsJsonAsync(URI, paramPut).Result;
                         if (response.IsSuccessStatusCode)
@@ -420,7 +421,7 @@ namespace TogglJiraConsole
                     var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
                     var xTags = String.Join(",", t);
                     var paramToggl = new { time_entry = new { tags = t } };
-                    var tokenAuxToggl = String.Format("{0}:api_token", user.XTokenToggl);
+                    var tokenAuxToggl = String.Format("{0}:api_token", user.xTogglToken);
                     var tokenBytesToggl = System.Text.Encoding.UTF8.GetBytes(tokenAuxToggl);
                     var tokenToggl = Convert.ToBase64String(tokenBytesToggl);
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", tokenToggl);
@@ -455,7 +456,7 @@ namespace TogglJiraConsole
 
         }
 
-        static Users GetUsuarios()
+        static List<User> GetUsuarios()
         {
             try
             {
@@ -463,12 +464,12 @@ namespace TogglJiraConsole
                 caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
                 caminhoArquivo += @"\Users.xml";
 
-                XmlSerializer ser = new XmlSerializer(typeof(Users));
+                XmlSerializer ser = new XmlSerializer(typeof(List<User>));
                 TextReader textReader = (TextReader)new StreamReader(caminhoArquivo);
                 XmlTextReader reader = new XmlTextReader(textReader);
                 reader.Read();
 
-                Users usu = (Users)ser.Deserialize(reader);
+                List<User> usu = (List<User>)ser.Deserialize(reader);
                 
                 return usu;
             }
@@ -477,7 +478,7 @@ namespace TogglJiraConsole
                 Log.Error(String.Format("Usuarios - Algum erro aconteceu na leitura dos usuarios."));
                 lError.Add(String.Format("Usuarios - Algum erro aconteceu na leitura dos usuarios: {0}", ex.GetAllMessages()));
                 
-                return new Users();
+                return new List<User>();
             }
 
         }

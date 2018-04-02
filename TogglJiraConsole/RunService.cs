@@ -12,6 +12,7 @@ using TogglJiraConsole.TogglModel;
 using TogglJiraConsole.UserModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
+using TogglJiraConsole.UserModel;
 
 namespace TogglJiraConsole
 {
@@ -19,7 +20,7 @@ namespace TogglJiraConsole
     {
         private Log log;
         private ArquivoXml xml;
-        private Users usuarios;
+        private List<User> usuarios;
         private TagsPendente tagsPendentes;
         private Toggl toggl;
         private Jira jira;
@@ -33,10 +34,8 @@ namespace TogglJiraConsole
             toggl = new Toggl();
             jira = new Jira();
             userDbContext = new UserDbContext();
-            var retUsu = xml.LerArqUsuarios();
-            //var retornoUsers = userDbContext.BuscarUsuarios();
-            //var usu = new List<User>();
-            //var retUsu = userDbContext.BuscarUsuarios();
+            //var retUsu = xml.LerArqUsuarios();
+            var retUsu = userDbContext.BuscarUsuarios();
             if (!retUsu.bError)
             {
                 usuarios = retUsu.obj;
@@ -67,11 +66,11 @@ namespace TogglJiraConsole
 
                 bool parar = false;
                                                                
-                if (usuarios.User.Count() > 0)
+                if (usuarios.Count() > 0)
                 {
-                    foreach (var usu in usuarios.User)
+                    foreach (var usu in usuarios)
                     {
-                        message = $"Iniciando a sincronização do usuário {usu.XNome}.";
+                        message = $"Iniciando a sincronização do usuário {usu.xNome}.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
                         
                         if (parar == true)
@@ -80,7 +79,7 @@ namespace TogglJiraConsole
                         }
 
                         // Setando a propridedade CLIENT_NAME com o nome do usuário que vai ser sincronizado. 
-                        Environment.SetEnvironmentVariable("CLIENT_NAME", usu.XNome);
+                        Environment.SetEnvironmentVariable("CLIENT_NAME", usu.xNome);
 
                         message = $"Iniciando a sincronização.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
@@ -89,7 +88,7 @@ namespace TogglJiraConsole
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
                         UserToggl userToggl = new UserToggl();
-                        var retUserToggl = toggl.GetUserToggl(XTokenToggl: usu.XTokenToggl);
+                        var retUserToggl = toggl.GetUserToggl(XTokenToggl: usu.xTogglToken);
                         if (!retUserToggl.bError)
                         {
                             userToggl = retUserToggl.obj;
@@ -100,7 +99,7 @@ namespace TogglJiraConsole
                         }
 
                         string xIdTagsPendente = string.Empty;
-                        var retWorkspaceTags = toggl.GetWorkspaceTags(user: userToggl, xTokenToggl: usu.XTokenToggl,
+                        var retWorkspaceTags = toggl.GetWorkspaceTags(user: userToggl, xTokenToggl: usu.xTogglToken,
                             tagsPendentes: tagsPendentes);
                         if (!retWorkspaceTags.bError)
                         {
@@ -113,7 +112,7 @@ namespace TogglJiraConsole
 
                         List<Datum> lDatum = new List<Datum>();
                         var retGetDetailedReport = toggl.GetDetailedReport(user: userToggl, 
-                            xIdTagsPendente: xIdTagsPendente, xTokenToggl: usu.XTokenToggl);
+                            xIdTagsPendente: xIdTagsPendente, xTokenToggl: usu.xTogglToken);
                         if (!retGetDetailedReport.bError)
                         {
                             lDatum = retGetDetailedReport.obj;

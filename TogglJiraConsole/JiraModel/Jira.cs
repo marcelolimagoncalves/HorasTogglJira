@@ -11,6 +11,7 @@ using TogglJiraConsole.LogModel;
 using TogglJiraConsole.TogglModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
+using TogglJiraConsole.UserModel;
 
 namespace TogglJiraConsole.JiraModel
 {
@@ -37,7 +38,7 @@ namespace TogglJiraConsole.JiraModel
             try
             {
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog";
-                var token = user.xTokenJira;
+                var token = user.xJiraToken;
                 var param = new { comment = infoWorklog.comment, started = infoWorklog.started, timeSpent = infoWorklog.timeSpent };
                 var ret = requisicaoHttp.ExecReqJira(tipo: new WorklogPost(), url: url, token: token,
                     metodoHttp: MetodoHttp.PostAsJsonAsync, param: param);
@@ -76,7 +77,7 @@ namespace TogglJiraConsole.JiraModel
             {
 
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog/{worklogPost.id}";
-                var token = user.xTokenJira;
+                var token = user.xJiraToken;
                 var ret = requisicaoHttp.ExecReqJira(tipo: new WorklogPost(), url: url, token: token,
                     metodoHttp: MetodoHttp.DeleteAsync, param: new object());
                 if (!ret.bError)
@@ -112,7 +113,7 @@ namespace TogglJiraConsole.JiraModel
             try
             {
                 var url = $"/rest/api/2/issue/{infoWorklog.key}/worklog/{worklogPost.id}";
-                var token = user.xTokenJira;
+                var token = user.xJiraToken;
                 var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(infoWorklog.dtStarted)).Replace("\"", "");
                 startedAux = startedAux.Replace(startedAux.Substring(19), ".000-0200");
                 var param = new { started = startedAux };

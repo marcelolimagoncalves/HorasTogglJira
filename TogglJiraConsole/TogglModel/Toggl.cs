@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.LogModel;
+using TogglJiraConsole.UserModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
 
@@ -235,7 +236,7 @@ namespace TogglJiraConsole.TogglModel
             {
 
                 var url = $"/api/v8/time_entries/{infoWorklog.time_entry_id}";
-                var token = user.XTokenToggl;
+                var token = user.xTogglToken;
                 var t = infoWorklog.tags.Where(i => !tagsPendentes.Tag.Contains(i.ToString().ToUpper())).ToArray();
                 var xTags = String.Join(",", t);
                 var param = new { time_entry = new { tags = t } };

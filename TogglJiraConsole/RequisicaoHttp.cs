@@ -198,9 +198,12 @@ namespace TogglJiraConsole
                 }
 
                 if (prefixes == null || prefixes.Length == 0)
+                {
                     mensagemErro = $"O prefixo URL não foi definido.";
                     log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
                     log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                }
+                   
 
                 foreach (string s in prefixes)
                 {
@@ -270,18 +273,19 @@ namespace TogglJiraConsole
                         if(lErros.Count <= 0)
                         {
                             ValidaUser validaUser = new ValidaUser();
-                            var retonoUsuario = validaUser.ValidarDadosUsuario(user);
-                            if (!retonoUsuario.bError)
-                            {
-                                userDbContext.SalvarUsuario(user);
-                            }
-                            else
-                            {
-                                foreach (var erro in retonoUsuario.lErros)
-                                {
-                                    lErros.Add(erro.mensagem);
-                                }
-                            }
+                            userDbContext.SalvarUsuario(user);
+                            //var retonoUsuario = validaUser.ValidarDadosUsuario(user);
+                            //if (!retonoUsuario.bError)
+                            //{
+                            //    userDbContext.SalvarUsuario(user);
+                            //}
+                            //else
+                            //{
+                            //    foreach (var erro in retonoUsuario.lErros)
+                            //    {
+                            //        lErros.Add(erro.mensagem);
+                            //    }
+                            //}
                         }
                         
                     }

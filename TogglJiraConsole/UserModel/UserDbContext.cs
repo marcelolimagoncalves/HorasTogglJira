@@ -18,10 +18,10 @@ namespace TogglJiraConsole.UserModel
             log = new Log();
         }
 
-        public Retorno<User> BuscarUsuarios()
+        public Retorno<List<User>> BuscarUsuarios()
         {
             string mensagemErro = string.Empty;
-            var retorno = new Retorno<User>(tipo: new User(), erros: new List<LogInfo>());
+            var retorno = new Retorno<List<User>>(tipo: new List<User>(), erros: new List<LogInfo>());
             var users = new List<User>();
             try
             {
@@ -59,6 +59,7 @@ namespace TogglJiraConsole.UserModel
                     users.Add(user);
                 }
 
+                retorno.obj = users;
                 return retorno;
             }
             catch (Exception ex)
@@ -210,7 +211,7 @@ namespace TogglJiraConsole.UserModel
                                 for (var i = 0; i < reader.FieldCount; i++)
                                 {
                                     var nomeDaColuna = reader.GetName(i);
-                                    var valorDaColuna = reader.IsDBNull(i) ? null : reader.GetString(i);
+                                    var valorDaColuna = reader.IsDBNull(i) ? null : reader.GetValue(i).ToString();
                                     linha.Add(nomeDaColuna, valorDaColuna);
                                 }
                                 linhas.Add(linha);
@@ -222,7 +223,7 @@ namespace TogglJiraConsole.UserModel
                     return retorno;
                 }
             }
-            catch(Exception ex )
+            catch(Exception ex)
             {
                 mensagemErro = $"Algum erro aconteceu ao executar uma operação no banco de dados: {ex.GetAllMessages()}";
                 retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = mensagemErro });

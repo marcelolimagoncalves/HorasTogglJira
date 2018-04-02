@@ -50,17 +50,19 @@ namespace TogglJiraConsole
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
-            //RunService r = new RunService();
-            //r.Run();
+            RunService r = new RunService();
+            r.Run();
 #else
-            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
-            {
-                if (!running)
-                {
-                    RunService r = new RunService();
-                    r.Run();
-                }
-            }
+            RunService r = new RunService();
+            r.Run();
+            //if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            //{
+            //    if (!running)
+            //    {
+            //        RunService r = new RunService();
+            //        r.Run();
+            //    }
+            //}
 #endif
         }
 
@@ -69,7 +71,7 @@ namespace TogglJiraConsole
         {
 
             string[] prefixes = new string[1];
-            prefixes[0] = "http://localhost:1300/cadastro/";
+            prefixes[0] = "http://localhost:1302/cadastro/";
             Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
            
            
