@@ -156,7 +156,7 @@ namespace TogglJiraConsole.JiraModel
                 var url = $"/rest/api/2/myself";
                 var token = xTokenJira;
                 var ret = requisicaoHttp.ExecReqJira(tipo: new MySelf(), url: url, token: token,
-                    metodoHttp: MetodoHttp.DeleteAsync, param: new object());
+                    metodoHttp: MetodoHttp.GetAsync, param: new object());
                 if (!ret.bError)
                 {
                     message = $"Jira - Registro de trabalho foi deletado com sucesso.";

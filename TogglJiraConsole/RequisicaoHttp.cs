@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using TogglJiraConsole.LogModel;
 using TogglJiraConsole.UserModel;
 using TogglJiraConsole.UtilModel;
+using System.Web;
 
 namespace TogglJiraConsole
 {
@@ -54,10 +55,13 @@ namespace TogglJiraConsole
                     else
                     {
                         var xRetResult = ret.obj.Content.ReadAsStringAsync().Result;
-                        int pFrom = xRetResult.IndexOf("<h1>") + "<h1>".Length;
-                        int pTo = xRetResult.LastIndexOf("</h1>");
-                        xRetResult = xRetResult.Substring(pFrom, pTo - pFrom);
-
+                        if (!string.IsNullOrEmpty(xRetResult))
+                        {
+                            int pFrom = xRetResult.IndexOf("<h1>") + "<h1>".Length;
+                            int pTo = xRetResult.LastIndexOf("</h1>");
+                            xRetResult = xRetResult.Substring(pFrom, pTo - pFrom);
+                        }
+                        
                         message = $"Jira - Ocorreu algum erro ao executar a requisição http.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
@@ -107,10 +111,13 @@ namespace TogglJiraConsole
                     else
                     {
                         var xRetResult = ret.obj.Content.ReadAsStringAsync().Result;
-                        int pFrom = xRetResult.IndexOf("message\":\"") + "message\":\"".Length;
-                        int pTo = xRetResult.LastIndexOf("\",\"tip\":");
-                        xRetResult = xRetResult.Substring(pFrom, pTo - pFrom);
-
+                        if (!string.IsNullOrEmpty(xRetResult))
+                        {
+                            int pFrom = xRetResult.IndexOf("message\":\"") + "message\":\"".Length;
+                            int pTo = xRetResult.LastIndexOf("\",\"tip\":");
+                            xRetResult = xRetResult.Substring(pFrom, pTo - pFrom);
+                        }
+                        
                         message = $"Toggl - Ocorreu algum erro ao executar a requisição http.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
@@ -224,7 +231,11 @@ namespace TogglJiraConsole
                         try
                         {
                             // Here i can read all parameters in string but how to parse each one i don't know  
+                            StringWriter myWriter = new StringWriter();
+                            // Decode the encoded string.
+                            
                             var data = ShowRequestData(request);
+                            data = WebUtility.UrlDecode(data);
                             var ldata = data.Split('&');
                             for (var i = 0; i <= ldata.Count(); i++)
                             {
@@ -273,25 +284,25 @@ namespace TogglJiraConsole
                         if(lErros.Count <= 0)
                         {
                             ValidaUser validaUser = new ValidaUser();
-                            userDbContext.SalvarUsuario(user);
-                            //var retonoUsuario = validaUser.ValidarDadosUsuario(user);
-                            //if (!retonoUsuario.bError)
-                            //{
-                            //    userDbContext.SalvarUsuario(user);
-                            //}
-                            //else
-                            //{
-                            //    foreach (var erro in retonoUsuario.lErros)
-                            //    {
-                            //        lErros.Add(erro.mensagem);
-                            //    }
-                            //}
+                            //userDbContext.SalvarUsuario(user);
+                            var retonoUsuario = validaUser.ValidarDadosUsuario(user);
+                            if (!retonoUsuario.bError)
+                            {
+                                userDbContext.SalvarUsuario(user);
+                            }
+                            else
+                            {
+                                foreach (var erro in retonoUsuario.lErros)
+                                {
+                                    lErros.Add(erro.mensagem);
+                                }
+                            }
                         }
                         
                     }
                     // Obtain a response object.
                     HttpListenerResponse response = context.Response;
-
+                    
                     string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
                     caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
                     caminhoArquivo += @"\View\cadastro.html";

@@ -101,7 +101,7 @@ namespace TogglJiraConsole.UserModel
             {
                 string comandoSQL = $@"SELECT * FROM User WHERE xJiraLogin = '{user.xJiraLogin}' OR xTogglToken = '{user.xTogglToken}'";
                 var retornoSQL = ExecutarComandoComRetorno(comandoSQL);
-                while (retornoSQL.obj.Count() > 0)
+                if (retornoSQL.obj.Count() > 0)
                 {
                     mensagemErro = "Este Usuário já está cadastrado!!!";
                     retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = mensagemErro });

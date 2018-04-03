@@ -14,7 +14,7 @@ namespace TogglJiraConsole.UserModel
         public string xJiraSenha { get; set; }
         public string xJiraToken {
             get {
-                return UtilModel.Util.Base64Encode((xJiraLogin + ":" + xJiraSenha));
+                return (xJiraLogin + ":" + xJiraSenha);
             }
         }
         public string xTogglToken { get; set; }

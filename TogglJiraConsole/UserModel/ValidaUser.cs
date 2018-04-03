@@ -41,7 +41,7 @@ namespace TogglJiraConsole.UserModel
                     retorno.lErros.AddRange(retornoToggl.lErros);
                 }
 
-                var xTokenJira = UtilModel.Util.Base64Encode(user.xJiraLogin + ":" + user.xJiraSenha);
+                var xTokenJira = user.xJiraToken;
                 var retornoJira = jira.GetUser(xTokenJira: xTokenJira);
                 if (retornoJira.bError)
                 {
