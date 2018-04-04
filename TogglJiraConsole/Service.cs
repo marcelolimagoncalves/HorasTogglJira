@@ -53,16 +53,14 @@ namespace TogglJiraConsole
             RunService r = new RunService();
             r.Run();
 #else
-            RunService r = new RunService();
-            r.Run();
-            //if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
-            //{
-            //    if (!running)
-            //    {
-            //        RunService r = new RunService();
-            //        r.Run();
-            //    }
-            //}
+            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            {
+                if (!running)
+                {
+                    RunService r = new RunService();
+                    r.Run();
+                }
+            }
 #endif
         }
 

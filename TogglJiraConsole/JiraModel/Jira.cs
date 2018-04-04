@@ -159,7 +159,7 @@ namespace TogglJiraConsole.JiraModel
                     metodoHttp: MetodoHttp.GetAsync, param: new object());
                 if (!ret.bError)
                 {
-                    message = $"Jira - Registro de trabalho foi deletado com sucesso.";
+                    message = $"Jira - As informações do usuário foram buscadas com sucesso.";
                     log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
 
                     retorno.obj = ret.obj;
@@ -173,10 +173,10 @@ namespace TogglJiraConsole.JiraModel
             }
             catch (Exception ex)
             {
-                message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho.";
+                message = $"Jira - Ocorreu algum erro ao buscar as informações do usuário.";
                 log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
-                message = $"Jira - Ocorreu algum erro ao deletar o Registro de trabalho: {ex.GetAllMessages()}";
+                message = $"Jira - Ocorreu algum erro ao buscar as informações do usuário: {ex.GetAllMessages()}";
                 retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });
                 return retorno;
             }

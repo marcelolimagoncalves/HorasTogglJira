@@ -284,11 +284,17 @@ namespace TogglJiraConsole
                         if(lErros.Count <= 0)
                         {
                             ValidaUser validaUser = new ValidaUser();
-                            //userDbContext.SalvarUsuario(user);
                             var retonoUsuario = validaUser.ValidarDadosUsuario(user);
                             if (!retonoUsuario.bError)
                             {
-                                userDbContext.SalvarUsuario(user);
+                                var retornoSalvar = userDbContext.SalvarUsuario(user);
+                                if (retornoSalvar.bError)
+                                {
+                                    foreach (var erro in retornoSalvar.lErros)
+                                    {
+                                        lErros.Add(erro.mensagem);
+                                    }
+                                }
                             }
                             else
                             {
@@ -307,19 +313,25 @@ namespace TogglJiraConsole
                     caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
                     caminhoArquivo += @"\View\cadastro.html";
                     string responseString = File.ReadAllText(caminhoArquivo);
-                    if (lErros.Count > 0)
+                    if (request.HttpMethod == "POST")
                     {
-                        var strErros = string.Empty;
-                        foreach (var erro in lErros)
+                        if (lErros.Count > 0)
                         {
-                            strErros = strErros + $"\"{erro.Replace("\r\n", "")}\",";
+                            var strErros = string.Empty;
+                            foreach (var erro in lErros)
+                            {
+                                strErros = strErros + $"\"{erro.Replace("\r\n", "")}\",";
+                            }
+                            strErros = strErros.Substring(0, strErros.Length - 1);
+                            responseString = responseString.Replace("{sucessos}", "");
+                            responseString = responseString.Replace("{erros}", strErros);
+
                         }
-                        strErros = strErros.Substring(0, strErros.Length - 1);
-                        responseString = responseString.Replace("{erros}", strErros);
-                    }
-                    else
-                    {
-                        responseString = responseString.Replace("{erros}", "");
+                        else
+                        {
+                            responseString = responseString.Replace("{erros}", "");
+                            responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\",\"Para lançar corretamente suas horas no Toggl procure algum colega de trabalho que certamente ele irá saber ;)\"");
+                        }
                     }
                     byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                     // Get a response stream and write the response to it.

@@ -77,6 +77,11 @@ namespace TogglJiraConsole.UserModel
             {
                 string query = $@"INSERT INTO User(xNome,xJiraLogin,xJiraSenha,xTogglToken) VALUES('{user.xNome}','{user.xJiraLogin}','{user.xJiraSenha}','{user.xTogglToken}')";
                 var ret = ExecutarQuerySemRetorno(query);
+                if (ret.bError)
+                {
+                    retorno.lErros.AddRange(ret.lErros);
+                }
+
 
                 return retorno;
             }
