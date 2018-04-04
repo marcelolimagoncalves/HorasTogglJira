@@ -211,7 +211,7 @@ namespace TogglJiraConsole
                     //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                 }
                           
-                if (!string.IsNullOrEmpty(mensagemErro))
+                if (string.IsNullOrEmpty(mensagemErro))
                 {
                     foreach (string s in prefixes)
                     {

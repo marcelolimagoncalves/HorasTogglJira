@@ -43,7 +43,7 @@ namespace TogglJiraConsole
         {
             if (setinterval)
             {
-                _timer.Interval = 660000;
+                _timer.Interval = 60000;
                 setinterval = false;
             }
 
