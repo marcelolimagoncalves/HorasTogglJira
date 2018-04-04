@@ -71,8 +71,7 @@ namespace TogglJiraConsole
             string[] prefixes = new string[1];
             prefixes[0] = "http://localhost:1302/cadastro/";
             Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
-           
-           
+                      
             _timer.Start();
         }
 

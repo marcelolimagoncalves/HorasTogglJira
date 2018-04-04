@@ -109,8 +109,8 @@ namespace TogglJiraConsole.TogglModel
             }
             catch (Exception ex)
             {
-                message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário.";
-                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                //message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário.";
+                //log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
                
                 message = $"Toggl - Ocorreu algum erro ao buscar as informações do usuário: {ex.GetAllMessages()}";
                 retorno.lErros.Add(new LogInfo() { dtLog = DateTime.Now, logLevel = LogLevel.Error, mensagem = message });

@@ -206,6 +206,8 @@ namespace TogglJiraConsole
                                 var retPutTogglTags = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
                                 if (!retPutTogglTags.bError)
                                 {
+                                    message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
                                     togglPost = retPutTogglTags.obj;
                                 }
                                 else

@@ -200,156 +200,159 @@ namespace TogglJiraConsole
                 if (!HttpListener.IsSupported)
                 {
                     mensagemErro = $"O sistema operacional não suporta o HttpListener.";
-                    log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                    log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                    //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                    //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                 }
 
                 if (prefixes == null || prefixes.Length == 0)
                 {
                     mensagemErro = $"O prefixo URL não foi definido.";
-                    log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                    log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                    //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                    //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
                 }
-                   
-
-                foreach (string s in prefixes)
+                          
+                if (!string.IsNullOrEmpty(mensagemErro))
                 {
-                    listener.Prefixes.Add(s);
-                }
-
-                listener.Start();
-                log.InserirSalvarLog(message: "O servidor http foi iniciado.", arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                while (true)
-                {
-                    var lErros = new List<string>();
-                    HttpListenerContext context = listener.GetContext();
-                    HttpListenerRequest request = context.Request;
-                    if (request.HttpMethod == "POST")
+                    foreach (string s in prefixes)
                     {
-                        User user = new User();
-                        try
+                        listener.Prefixes.Add(s);
+                    }
+
+                    listener.Start();
+                    //log.InserirSalvarLog(message: "O servidor http foi iniciado.", arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+                    while (true)
+                    {
+                        var lErros = new List<string>();
+                        HttpListenerContext context = listener.GetContext();
+                        HttpListenerRequest request = context.Request;
+                        if (request.HttpMethod == "POST")
                         {
-                            // Here i can read all parameters in string but how to parse each one i don't know  
-                            StringWriter myWriter = new StringWriter();
-                            // Decode the encoded string.
-                            
-                            var data = ShowRequestData(request);
-                            data = WebUtility.UrlDecode(data);
-                            var ldata = data.Split('&');
-                            for (var i = 0; i <= ldata.Count(); i++)
+                            User user = new User();
+                            try
                             {
-                                switch (i)
+                                // Here i can read all parameters in string but how to parse each one i don't know  
+                                StringWriter myWriter = new StringWriter();
+                                // Decode the encoded string.
+
+                                var data = ShowRequestData(request);
+                                data = WebUtility.UrlDecode(data);
+                                var ldata = data.Split('&');
+                                for (var i = 0; i <= ldata.Count(); i++)
                                 {
-                                    case 0:
-                                        user.xNome = ldata[i].Split('=')[1].Replace('+', ' ');
-                                        if (string.IsNullOrEmpty(user.xNome))
-                                        {
-                                            lErros.Add("O campo Nome deve ser informado.");
-                                        }
-                                        break;
-                                    case 1:
-                                        user.xJiraLogin = ldata[i].Split('=')[1].Replace('+', ' ');
-                                        if (string.IsNullOrEmpty(user.xJiraLogin))
-                                        {
-                                            lErros.Add("O campo Jira Login deve ser informado.");
-                                        }
-                                        break;
-                                    case 2:
-                                        user.xJiraSenha = ldata[i].Split('=')[1].Replace('+', ' ');
-                                        if (string.IsNullOrEmpty(user.xJiraSenha))
-                                        {
-                                            lErros.Add("O campo Jira Senha deve ser informado.");
-                                        }
-                                        break;
-                                    case 3:
-                                        user.xTogglToken = ldata[i].Split('=')[1].Replace('+', ' ');
-                                        if (string.IsNullOrEmpty(user.xTogglToken))
-                                        {
-                                            lErros.Add("O campo Toggl Token deve ser informado.");
-                                        }
-                                        break;
+                                    switch (i)
+                                    {
+                                        case 0:
+                                            user.xNome = ldata[i].Split('=')[1].Replace('+', ' ');
+                                            if (string.IsNullOrEmpty(user.xNome))
+                                            {
+                                                lErros.Add("O campo Nome deve ser informado.");
+                                            }
+                                            break;
+                                        case 1:
+                                            user.xJiraLogin = ldata[i].Split('=')[1].Replace('+', ' ');
+                                            if (string.IsNullOrEmpty(user.xJiraLogin))
+                                            {
+                                                lErros.Add("O campo Jira Login deve ser informado.");
+                                            }
+                                            break;
+                                        case 2:
+                                            user.xJiraSenha = ldata[i].Split('=')[1].Replace('+', ' ');
+                                            if (string.IsNullOrEmpty(user.xJiraSenha))
+                                            {
+                                                lErros.Add("O campo Jira Senha deve ser informado.");
+                                            }
+                                            break;
+                                        case 3:
+                                            user.xTogglToken = ldata[i].Split('=')[1].Replace('+', ' ');
+                                            if (string.IsNullOrEmpty(user.xTogglToken))
+                                            {
+                                                lErros.Add("O campo Toggl Token deve ser informado.");
+                                            }
+                                            break;
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            mensagemErro = $"Algum erro aconteceu com os campos informados.";
-                            log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
-                            mensagemErro = mensagemErro + $": {ex.GetAllMessages()}";
-                            log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
-                            lErros.Add(mensagemErro);
-                        }
-
-                        if(lErros.Count <= 0)
-                        {
-                            ValidaUser validaUser = new ValidaUser();
-                            var retonoUsuario = validaUser.ValidarDadosUsuario(user);
-                            if (!retonoUsuario.bError)
+                            catch (Exception ex)
                             {
-                                var retornoSalvar = userDbContext.SalvarUsuario(user);
-                                if (retornoSalvar.bError)
+                                //mensagemErro = $"Algum erro aconteceu com os campos informados.";
+                                //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                                mensagemErro = mensagemErro + $": {ex.GetAllMessages()}";
+                                //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                                lErros.Add(mensagemErro);
+                            }
+
+                            if (lErros.Count <= 0)
+                            {
+                                ValidaUser validaUser = new ValidaUser();
+                                var retonoUsuario = validaUser.ValidarDadosUsuario(user);
+                                if (!retonoUsuario.bError)
                                 {
-                                    foreach (var erro in retornoSalvar.lErros)
+                                    var retornoSalvar = userDbContext.SalvarUsuario(user);
+                                    if (retornoSalvar.bError)
+                                    {
+                                        foreach (var erro in retornoSalvar.lErros)
+                                        {
+                                            lErros.Add(erro.mensagem);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var erro in retonoUsuario.lErros)
                                     {
                                         lErros.Add(erro.mensagem);
                                     }
                                 }
                             }
+
+                        }
+                        // Obtain a response object.
+                        HttpListenerResponse response = context.Response;
+
+                        string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+                        caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                        caminhoArquivo += @"\View\cadastro.html";
+                        string responseString = File.ReadAllText(caminhoArquivo);
+                        if (request.HttpMethod == "POST")
+                        {
+                            if (lErros.Count > 0)
+                            {
+                                var strErros = string.Empty;
+                                foreach (var erro in lErros)
+                                {
+                                    strErros = strErros + $"\"{erro.Replace("\r\n", "")}\",";
+                                }
+                                strErros = strErros.Substring(0, strErros.Length - 1);
+                                responseString = responseString.Replace("{sucessos}", "");
+                                responseString = responseString.Replace("{erros}", strErros);
+
+                            }
                             else
                             {
-                                foreach (var erro in retonoUsuario.lErros)
-                                {
-                                    lErros.Add(erro.mensagem);
-                                }
+                                responseString = responseString.Replace("{erros}", "");
+                                responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\",\"Para lançar corretamente suas horas no Toggl procure algum colega de trabalho que certamente ele irá saber ;)\"");
                             }
                         }
-                        
-                    }
-                    // Obtain a response object.
-                    HttpListenerResponse response = context.Response;
-                    
-                    string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
-                    caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
-                    caminhoArquivo += @"\View\cadastro.html";
-                    string responseString = File.ReadAllText(caminhoArquivo);
-                    if (request.HttpMethod == "POST")
-                    {
-                        if (lErros.Count > 0)
-                        {
-                            var strErros = string.Empty;
-                            foreach (var erro in lErros)
-                            {
-                                strErros = strErros + $"\"{erro.Replace("\r\n", "")}\",";
-                            }
-                            strErros = strErros.Substring(0, strErros.Length - 1);
-                            responseString = responseString.Replace("{sucessos}", "");
-                            responseString = responseString.Replace("{erros}", strErros);
+                        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+                        // Get a response stream and write the response to it.
+                        response.ContentLength64 = buffer.Length;
+                        System.IO.Stream output = response.OutputStream;
+                        output.Write(buffer, 0, buffer.Length);
+                        // You must close the output stream.
+                        output.Close();
 
-                        }
-                        else
-                        {
-                            responseString = responseString.Replace("{erros}", "");
-                            responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\",\"Para lançar corretamente suas horas no Toggl procure algum colega de trabalho que certamente ele irá saber ;)\"");
-                        }
                     }
-                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                    // Get a response stream and write the response to it.
-                    response.ContentLength64 = buffer.Length;
-                    System.IO.Stream output = response.OutputStream;
-                    output.Write(buffer, 0, buffer.Length);
-                    // You must close the output stream.
-                    output.Close();
-
                 }
+                
             }
             catch (Exception ex)
             {
-                mensagemErro = $"Ocorreu algum erro com o servidor http.";
-                log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
+                //mensagemErro = $"Ocorreu algum erro com o servidor http.";
+                //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Principal, logLevel: LogLevel.Error);
 
                 mensagemErro = $"Ocorreu algum erro com o servidor http: {ex.GetAllMessages()}";
-                log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
+                //log.InserirSalvarLog(message: mensagemErro, arqLog: ArqLog.Erro, logLevel: LogLevel.Error);
             }
 
         }
