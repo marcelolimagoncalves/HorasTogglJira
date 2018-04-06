@@ -32,6 +32,7 @@ Source: "..\TogglJiraConsole\uninstall.bat"; DestDir: "{app}"; Flags: ignorevers
 Source: "..\TogglJiraConsole\*.xml"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "..\TogglJiraConsole\*.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\TogglJiraConsole\*.xsd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TogglJiraConsole\View\cadastro.html"; DestDir: "{app}\View"; Flags: ignoreversion
 
 [Run]
 Filename: "{app}\install.bat";
