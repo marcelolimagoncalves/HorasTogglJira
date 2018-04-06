@@ -110,7 +110,7 @@
     <Compile Include="TogglModel\WorkspaceTags.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="View\materialize.min.css" />
+    <Content Include="View\Css\materialize.min.css" />
     <Content Include="View\Css\materialize.css" />
     <None Include="App.config">
       <SubType>Designer</SubType>

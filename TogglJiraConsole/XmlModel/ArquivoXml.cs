@@ -44,8 +44,9 @@ namespace TogglJiraConsole.XmlModel
             try
             {
 
-                string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
-                caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                //string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+                //caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                string caminhoArquivo = System.AppDomain.CurrentDomain.BaseDirectory;
                 caminhoArquivo += nomeArq;
 
                 XmlSerializer ser = new XmlSerializer(typeof(T));

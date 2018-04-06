@@ -310,8 +310,9 @@ namespace TogglJiraConsole
                         // Obtain a response object.
                         HttpListenerResponse response = context.Response;
 
-                        string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
-                        caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                        //string caminhoArquivo = Path.GetDirectoryName(System.AppDomain.CurrentDomain.BaseDirectory);
+                        //caminhoArquivo = Directory.GetParent(Directory.GetParent(caminhoArquivo).FullName).FullName;
+                        string caminhoArquivo = System.AppDomain.CurrentDomain.BaseDirectory;
                         caminhoArquivo += @"\View\cadastro.html";
                         string responseString = File.ReadAllText(caminhoArquivo);
                         if (request.HttpMethod == "POST")

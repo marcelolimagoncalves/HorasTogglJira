@@ -53,14 +53,26 @@ namespace TogglJiraConsole
             RunService r = new RunService();
             r.Run();
 #else
-            if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
-            {
-                if (!running)
-                {
-                    RunService r = new RunService();
-                    r.Run();
-                }
-            }
+            string caminhoArquivo1 = System.AppDomain.CurrentDomain.BaseDirectory;
+            caminhoArquivo1 += @"\Logs\NewText02.txt";
+            FileStream fs1 = new FileStream(caminhoArquivo1,
+                FileMode.Append);
+            StreamWriter sw1 = new StreamWriter(fs1);
+            sw1.WriteLine("Testando 02");
+            sw1.Flush();
+            sw1.Close();
+            fs1.Close();
+
+            RunService r = new RunService();
+            r.Run();
+            //if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
+            //{
+            //    if (!running)
+            //    {
+            //        RunService r = new RunService();
+            //        r.Run();
+            //    }
+            //}
 #endif
         }
 
