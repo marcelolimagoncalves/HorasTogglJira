@@ -90,15 +90,15 @@ namespace TogglJiraConsole
                         message = $"Buscando as horas lançadas no toggl.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
-                        string caminhoArquivo1 = System.AppDomain.CurrentDomain.BaseDirectory;
-                        caminhoArquivo1 += @"\Logs\NewText03.txt";
-                        FileStream fs1 = new FileStream(caminhoArquivo1,
-                            FileMode.Append);
-                        StreamWriter sw1 = new StreamWriter(fs1);
-                        sw1.WriteLine("Testando 03");
-                        sw1.Flush();
-                        sw1.Close();
-                        fs1.Close();
+                        //string caminhoArquivo1 = System.AppDomain.CurrentDomain.BaseDirectory;
+                        //caminhoArquivo1 += @"\Logs\NewText03.txt";
+                        //FileStream fs1 = new FileStream(caminhoArquivo1,
+                        //    FileMode.Append);
+                        //StreamWriter sw1 = new StreamWriter(fs1);
+                        //sw1.WriteLine("Testando 03");
+                        //sw1.Flush();
+                        //sw1.Close();
+                        //fs1.Close();
 
                         UserToggl userToggl = new UserToggl();
                         var retUserToggl = toggl.GetUserToggl(XTokenToggl: usu.xTogglToken);

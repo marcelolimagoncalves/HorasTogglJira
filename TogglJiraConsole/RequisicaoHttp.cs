@@ -332,7 +332,7 @@ namespace TogglJiraConsole
                             else
                             {
                                 responseString = responseString.Replace("{erros}", "");
-                                responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\",\"Para lançar corretamente suas horas no Toggl procure algum colega de trabalho que certamente ele irá saber ;)\"");
+                                responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\"");
                             }
                         }
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
