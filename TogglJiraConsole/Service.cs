@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Owin.Hosting;
+using Newtonsoft.Json;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -19,16 +20,18 @@ using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.TogglModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
+using Topshelf;
 
 namespace TogglJiraConsole
 {
-    public class Service
+    public class Service : ServiceControl
     {
         private static bool running = false;
         private static bool setinterval = true;
 
         private System.Timers.Timer _timer;
         private RequisicaoHttp requisicaoHttp;
+        private IDisposable _webApplication;
 
         public Service()
         {
@@ -78,20 +81,42 @@ namespace TogglJiraConsole
         }
 
 
-        public async Task Start()
-        {
+        //public async Task Start()
+        //{
 
-            string[] prefixes = new string[1];
-            prefixes[0] = "http://localhost:1302/cadastro/";
-            Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
+        //    string[] prefixes = new string[1];
+        //    prefixes[0] = "http://localhost:1302/cadastro/";
+        //    Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
                       
+        //    _timer.Start();
+        //}
+
+        //public void Stop()
+        //{
+        //    requisicaoHttp.FecharServidorHttp();
+        //    _timer.Stop();
+        //}
+
+        public bool Start(HostControl hostControl)
+        {
+            Console.WriteLine("Iniciando o serviço");
+            _webApplication = WebApp.Start<OwinConfiguration>("http://localhost:8089");
+            Console.WriteLine("Serviço Iniciado");
+
             _timer.Start();
+
+            return true;
+        }
+        public bool Stop(HostControl hostControl)
+        {
+            Console.WriteLine("Terminando o serviço");
+            _webApplication.Dispose();
+            Console.WriteLine("Serviço terminado");
+
+            _timer.Stop();
+
+            return true;
         }
 
-        public void Stop()
-        {
-            requisicaoHttp.FecharServidorHttp();
-            _timer.Stop();
-        }
     }
 }

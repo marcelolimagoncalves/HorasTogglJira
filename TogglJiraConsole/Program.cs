@@ -21,21 +21,28 @@ namespace TogglJiraConsole
         static void Main(string[] args)
         {
 
-            HostFactory.Run(p =>
+            //HostFactory.Run(p =>
+            //{
+            //    p.Service<Service>(s =>
+            //    {
+            //        s.ConstructUsing(st => new Service());
+            //        s.WhenStarted(st => st.Start());
+            //        s.WhenStopped(sp => sp.Stop());
+            //    });
+            //    p.RunAsLocalService();
+
+            //    p.SetDescription("Serviço de integração de horas trabalhadas entre Toggl e Jira");
+            //    p.SetDisplayName("Horas Toggl Jira");
+            //    p.SetServiceName("HorasTogglJira");
+            //});
+            HostFactory.Run(x =>
             {
-                p.Service<Service>(s =>
-                {
-                    s.ConstructUsing(st => new Service());
-                    s.WhenStarted(st => st.Start());
-                    s.WhenStopped(sp => sp.Stop());
-                });
-                p.RunAsLocalService();
-
-                p.SetDescription("Serviço de integração de horas trabalhadas entre Toggl e Jira");
-                p.SetDisplayName("Horas Toggl Jira");
-                p.SetServiceName("HorasTogglJira");
+                x.Service<Service>();
+                x.RunAsLocalSystem();
+                x.SetDescription("Serviço para integração de horas entre o aplicativo Jira e Toggl");
+                x.SetDisplayName("horas.toggl.jira");
+                x.SetServiceName("horas.toggl.jira");
             });
-
         }
     }
 }
