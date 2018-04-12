@@ -19,6 +19,7 @@ using TogglJiraConsole.JiraModel;
 using TogglJiraConsole.TogglModel;
 using TogglJiraConsole.UtilModel;
 using TogglJiraConsole.XmlModel;
+using Nancy.Hosting.Self;
 
 namespace TogglJiraConsole
 {
@@ -81,10 +82,15 @@ namespace TogglJiraConsole
         public async Task Start()
         {
 
-            string[] prefixes = new string[1];
-            prefixes[0] = "http://localhost:1302/cadastro/";
-            Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
-                      
+            //string[] prefixes = new string[1];
+            //prefixes[0] = "http://localhost:1302/cadastro/";
+            //Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
+
+            NancyHost host;
+            string URL = "http://localhost:8089";
+            host = new NancyHost(new Uri(URL));
+            host.Start();
+
             _timer.Start();
         }
 
