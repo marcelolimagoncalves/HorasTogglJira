@@ -51,22 +51,9 @@ namespace TogglJiraConsole
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
-            RunService r = new RunService();
-            r.Run();
-#else
-            //string caminhoArquivo1 = System.AppDomain.CurrentDomain.BaseDirectory;
-            //caminhoArquivo1 += @"\Logs\NewText02.txt";
-            //FileStream fs1 = new FileStream(caminhoArquivo1,
-            //    FileMode.Append);
-            //StreamWriter sw1 = new StreamWriter(fs1);
-            //sw1.WriteLine("Testando 02");
-            //sw1.Flush();
-            //sw1.Close();
-            //fs1.Close();
-
             //RunService r = new RunService();
             //r.Run();
-
+#else
             if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
             {
                 if (!running)
@@ -81,10 +68,6 @@ namespace TogglJiraConsole
 
         public async Task Start()
         {
-
-            //string[] prefixes = new string[1];
-            //prefixes[0] = "http://localhost:1302/cadastro/";
-            //Task.Run(() => requisicaoHttp.IniciarServidorHttp(prefixes));
 
             NancyHost host;
             string URL = "http://localhost:8089";
