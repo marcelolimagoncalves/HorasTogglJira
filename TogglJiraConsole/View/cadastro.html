@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--<link rel="stylesheet" type="text/css" href="materialize.min.css">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    
+    
     <style>
                 /*!
         * Materialize v1.0.0-beta (http://materializecss.com)
@@ -2706,14 +2708,14 @@
                     }
                 }
 
-        .page-footer {
-            padding-top: 20px;
-            color: #fff;
-            background-color: #ee6e73;
-            position: absolute;
-            /*bottom: 0;*/
-            width: 100%;
-        }
+                .page-footer {
+                    padding-top: 20px;
+                    color: #fff;
+                    background-color: #ee6e73;
+                    position: absolute;
+                    /*bottom: 0;*/
+                    width: 100%;
+                }
 
                     .page-footer .footer-copyright {
                         overflow: hidden;
@@ -2734,6 +2736,12 @@
                         color: rgba(255,255,255,0.8);
                         background-color: rgba(51,51,51,0.08)
                     }
+
+                @media (min-height: 840px) {
+                    .page-footer {
+                        bottom: 0;
+                    }
+                }
 
                 table, th, td {
                     border: none
