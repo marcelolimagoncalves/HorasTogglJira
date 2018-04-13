@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Net;
 using TogglJiraConsole.UserModel;
 using System.IO;
+using TogglJiraConsole.ViewModel;
 
 namespace TogglJiraConsole.NancyModel
 {
@@ -20,15 +21,16 @@ namespace TogglJiraConsole.NancyModel
             userDbContext = new UserDbContext();
             var lErros = new List<string>();
 
-            Get["/Cadastro"] = x =>
+            Get["/HorasTogglJira/Usuario"] = x =>
             {
-                return View["view/cadastro.html"];
+                MensagensRetorno mensagens = new MensagensRetorno();
+                return View[viewName: "view/cadastro.html", model: mensagens];
             };
 
-            Post["/Cadastro"] = y =>
+            Post["/HorasTogglJira/Usuario"] = y =>
             {
                 User user = new User();
-                if (Request.Form["nome"].HasValue)
+                if (!String.IsNullOrEmpty(Request.Form["nome"]))
                 {
                     user.xNome = Request.Form["nome"];
                 }
@@ -36,7 +38,7 @@ namespace TogglJiraConsole.NancyModel
                 {
                     lErros.Add("O campo Nome deve ser informado.");
                 }
-                if (Request.Form["login"].HasValue)
+                if (!String.IsNullOrEmpty(Request.Form["login"]))
                 {
                     user.xJiraLogin = Request.Form["login"];
                 }
@@ -44,7 +46,7 @@ namespace TogglJiraConsole.NancyModel
                 {
                     lErros.Add("O campo Jira Login deve ser informado.");
                 }
-                if (Request.Form["senha"].HasValue)
+                if (!String.IsNullOrEmpty(Request.Form["senha"]))
                 {
                     user.xJiraSenha = Request.Form["senha"];
                 }
@@ -52,7 +54,7 @@ namespace TogglJiraConsole.NancyModel
                 {
                     lErros.Add("O campo Jira Senha deve ser informado.");
                 }
-                if (Request.Form["token"].HasValue)
+                if (!String.IsNullOrEmpty(Request.Form["token"]))
                 {
                     user.xTogglToken = Request.Form["token"];
                 }
@@ -90,25 +92,28 @@ namespace TogglJiraConsole.NancyModel
                 caminhoArquivo += @"\View\cadastro.html";
                 string responseString = File.ReadAllText(caminhoArquivo);
 
+                MensagensRetorno mensagens = new MensagensRetorno();
                 if (lErros.Count > 0)
                 {
-                    var strErros = string.Empty;
+                    
+                    mensagens.bErro = true;
                     foreach (var erro in lErros)
                     {
-                        strErros = strErros + $"\"{erro.Replace("\r\n", "")}\",";
+                        mensagens.erros = mensagens.erros + "\"" + erro + "\",";
                     }
-                    strErros = strErros.Substring(0, strErros.Length - 1);
-                    responseString = responseString.Replace("{sucessos}", "");
-                    responseString = responseString.Replace("{erros}", strErros);
+                    mensagens.erros = mensagens.erros.Substring(0, mensagens.erros.Length - 1);
+                    mensagens.erros = mensagens.erros.Replace("\r\n", "");
 
                 }
                 else
                 {
-                    responseString = responseString.Replace("{erros}", "");
-                    responseString = responseString.Replace("{sucessos}", "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\"");
-                }
 
-                return View[viewName: "view/cadastro.html", model: lErros];
+                    mensagens.bSucesso = true;
+                    mensagens.sucessos = mensagens.sucessos + "\"Suas informações foram salvas com sucesso!\",\"Agora suas horas serão sincronizadas se estiverem lançadas no Toggl corretamente.\"";
+                    
+                }
+                
+                return View[viewName: "view/cadastro.html", model: mensagens];
             };
 
             

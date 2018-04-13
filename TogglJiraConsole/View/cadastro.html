@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
@@ -8449,7 +8450,7 @@
                             <div class="card-panel">
 
                                 <div class="row">
-                                    <form class="col s12" id="formCadastro" action="Cadastro" method="post">
+                                    <form class="col s12" id="formCadastro" action="Usuario" method="post">
                                         <div class="row">
                                             <div class="input-field col s12">
                                                 <input id="nome" name="nome" type="text">
@@ -8511,12 +8512,19 @@
 
             $("#nome").focus();
 
-            var lErros = [{ erros }];
+            var lErros = [];
+            if('@Model.bErro' === 'True')
+            {
+                lErros = [@Model.erros];
+            }
             if (lErros.length > 0) {
                 addError(lErros);
             }
 
-            var lSucessos = [{ sucessos }];
+            var lSucessos = [];
+             if('@Model.bSucesso' === 'True'){
+                lSucessos = [@Model.sucessos];
+            }
             if (lSucessos.length > 0) {
                 addSuccess(lSucessos);
             }

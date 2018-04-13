@@ -106,6 +106,7 @@
     <Compile Include="UserModel\User.cs" />
     <Compile Include="UserModel\UserDbContext.cs" />
     <Compile Include="UserModel\ValidaUser.cs" />
+    <Compile Include="ViewModel\MensagensRetorno.cs" />
     <Compile Include="XmlModel\ArquivoXml.cs" />
     <Compile Include="TogglModel\DetailedReport.cs" />
     <Compile Include="UtilModel\ExceptionMessages.cs" />
@@ -125,12 +126,12 @@
     <Compile Include="TogglModel\WorkspaceTags.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="View\Css\materialize.css" />
+    <Content Include="content\css\materialize.css" />
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
     <Content Include="View\cadastro.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -147,7 +148,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="View\JavaScript\" />
+    <Folder Include="content\Js\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets')" />
