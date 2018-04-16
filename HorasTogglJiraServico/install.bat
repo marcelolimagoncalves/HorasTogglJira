@@ -1,1 +1,1 @@
-TogglJiraConsole.exe install
+HorasTogglJiraServico.exe install

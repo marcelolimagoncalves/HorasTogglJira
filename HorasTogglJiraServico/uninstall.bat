@@ -1,1 +1,1 @@
-TogglJiraConsole.exe uninstall
+HorasTogglJiraServico.exe uninstall
