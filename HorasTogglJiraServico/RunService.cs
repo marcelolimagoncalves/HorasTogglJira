@@ -35,7 +35,6 @@ namespace HorasTogglJiraServico
             toggl = new Toggl();
             jira = new Jira();
             userDbContext = new UserDbContext();
-            //var retUsu = xml.LerArqUsuarios();
             var retUsu = userDbContext.BuscarUsuarios();
             if (!retUsu.bError)
             {
@@ -71,9 +70,7 @@ namespace HorasTogglJiraServico
                 {
                     foreach (var usu in usuarios)
                     {
-                        message = $"Iniciando a sincronização do usuário {usu.xNome}.";
-                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
+                       
                         if (parar == true)
                         {
                             break;
@@ -84,21 +81,14 @@ namespace HorasTogglJiraServico
                         // Setando a propridedade CLIENT_NAME com o nome do usuário que vai ser sincronizado. 
                         Environment.SetEnvironmentVariable("CLIENT_NAME", usu.xNome);
 
+                        message = $"Iniciando a sincronização do usuário {usu.xNome}.";
+                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
                         message = $"Iniciando a sincronização.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
 
                         message = $"Buscando as horas lançadas no toggl.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                        //string caminhoArquivo1 = System.AppDomain.CurrentDomain.BaseDirectory;
-                        //caminhoArquivo1 += @"\Logs\NewText03.txt";
-                        //FileStream fs1 = new FileStream(caminhoArquivo1,
-                        //    FileMode.Append);
-                        //StreamWriter sw1 = new StreamWriter(fs1);
-                        //sw1.WriteLine("Testando 03");
-                        //sw1.Flush();
-                        //sw1.Close();
-                        //fs1.Close();
 
                         UserToggl userToggl = new UserToggl();
                         var retUserToggl = toggl.GetUserToggl(XTokenToggl: usu.xTogglToken);

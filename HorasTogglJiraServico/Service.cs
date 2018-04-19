@@ -51,8 +51,8 @@ namespace HorasTogglJiraServico
             var dataInicio = new DateTime(day: DateTime.Now.Day, month: DateTime.Now.Month, year: DateTime.Now.Year, hour: TimeStarterRun.Hour,
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
-            //RunService r = new RunService();
-            //r.Run();
+            RunService r = new RunService();
+            r.Run();
 #else
             if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
             {
