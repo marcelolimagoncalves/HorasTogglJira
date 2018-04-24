@@ -169,8 +169,8 @@ namespace HorasTogglJiraServico.TogglModel
             string message;
             try
             {
-                var since = DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd");
-                var until = DateTime.Now.ToString("yyyy-MM-dd");
+                var since = DateTime.Now.AddDays(-1).AddYears(-1).ToString("yyyy-MM-dd");
+                var until = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
                 var configSince = ConfigurationManager.AppSettings["since"];
                 var configUntil = ConfigurationManager.AppSettings["until"];
                 if (!string.IsNullOrEmpty(configSince) && !string.IsNullOrEmpty(configUntil))

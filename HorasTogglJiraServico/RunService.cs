@@ -180,6 +180,7 @@ namespace HorasTogglJiraServico
                                         }
                                         else
                                         {
+                                            retPutTimeStarted.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                             lErros.AddRange(retPutTimeStarted.lErros);
 
                                             message = $"Jira - Tentando deletar o horário inserido.";
@@ -192,6 +193,7 @@ namespace HorasTogglJiraServico
                                             }
                                             else
                                             {
+                                                retDeleteWorklog.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                                 lErros.AddRange(retDeleteWorklog.lErros);
                                             }
                                         }
@@ -210,11 +212,13 @@ namespace HorasTogglJiraServico
                                     }
                                     else
                                     {
+                                        retPutTogglTags.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                         lErros.AddRange(retPutTogglTags.lErros);
                                     }
                                 }
                                 else
                                 {
+                                    retPostJira.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                     lErros.AddRange(retPostJira.lErros);
                                 }
 
@@ -233,15 +237,14 @@ namespace HorasTogglJiraServico
                             caminhoArquivo += $@"Logs\{Environment.GetEnvironmentVariable("CLIENT_NAME")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM-dd")}-Erros.log";
                             FileStream fs = new FileStream(caminhoArquivo,
                                 FileMode.Append);
+                            StreamWriter sw = new StreamWriter(fs);
                             foreach (var erro in lErros)
                             {
-                                StreamWriter sw = new StreamWriter(fs);
                                 var strErro = $"{erro.dtLog.ToString("HH:mm:ss")} | ERROR | {erro.mensagem}";
                                 sw.WriteLine(strErro);
-                                sw.Flush();
-                                sw.Close();
-
                             }
+                            sw.Flush();
+                            sw.Close();
                             fs.Close();
                         }
                     }
