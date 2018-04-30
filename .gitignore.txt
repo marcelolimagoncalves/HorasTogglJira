@@ -1,4 +1,0 @@
-packages/*
-HorasTogglJiraServico/bin/*
-HorasTogglJiraServico/obj/*
-.vs/*
