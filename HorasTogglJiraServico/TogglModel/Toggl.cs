@@ -63,9 +63,9 @@ namespace HorasTogglJiraServico.TogglModel
                     infoWorklog.dtStarted = data.start;
                     var startedAux = (Newtonsoft.Json.JsonConvert.SerializeObject(data.start)).Replace("\"", "");
                     infoWorklog.started = startedAux.Replace(startedAux.Substring(19), ".000-0300");
-                    infoWorklog.timeSpent = util.MilisecondsToJiraFormat(mili: data.dur);
-                    infoWorklog.timeSpentSeconds = data.dur / 1000;
-                    infoWorklog.time_entry_id = data.id;
+                    infoWorklog.timeSpent = util.MilisecondsToJiraFormat(mili: data.dur ?? 0);
+                    infoWorklog.timeSpentSeconds = data.dur ?? 0 / 1000;
+                    infoWorklog.time_entry_id = data.id ?? 0;
                     infoWorklog.tags = data.tags;
 
                     lToggl.Add(infoWorklog);

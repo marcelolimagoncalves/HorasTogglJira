@@ -20,6 +20,7 @@ using HorasTogglJiraServico.TogglModel;
 using HorasTogglJiraServico.UtilModel;
 using HorasTogglJiraServico.XmlModel;
 using Nancy.Hosting.Self;
+using HorasTogglJiraServico.LogModel;
 
 namespace HorasTogglJiraServico
 {
@@ -30,12 +31,15 @@ namespace HorasTogglJiraServico
 
         private System.Timers.Timer _timer;
         private RequisicaoHttp requisicaoHttp;
+        private Log log;
 
         public Service()
         {
             requisicaoHttp = new RequisicaoHttp();
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += timer_Elapsed;
+            log = new Log();
+            Environment.SetEnvironmentVariable("CLIENT_NAME", "Servidor");
         }
 
         static DateTime TimeStarterRun = DateTime.ParseExact(ConfigurationManager.AppSettings["TimeStarterRun"], "HH:mm", CultureInfo.InvariantCulture);
@@ -52,14 +56,29 @@ namespace HorasTogglJiraServico
                 minute: TimeStarterRun.Minute, second: TimeStarterRun.Second);
 #if DEBUG
             RunService r = new RunService();
-            r.Run();
+            if(r.lErros.Count > 0)
+            {
+                log.EscreverArqLogErro(r.lErros);
+            }
+            else
+            {
+                r.Run();
+            }
+            
 #else
             if (Convert.ToDateTime(DateTime.Now.ToString("dd/MM/yyyy HH:mm")) == Convert.ToDateTime(dataInicio.ToString("dd/MM/yyyy HH:mm")))
             {
                 if (!running)
                 {
                     RunService r = new RunService();
-                    r.Run();
+                    if (r.lErros.Count > 0)
+                    {
+                        log.EscreverArqLogErro(r.lErros);
+                    }
+                    else
+                    {
+                        r.Run();
+                    }
                 }
             }
 #endif

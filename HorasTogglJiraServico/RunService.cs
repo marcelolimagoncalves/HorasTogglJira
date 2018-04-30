@@ -25,7 +25,7 @@ namespace HorasTogglJiraServico
         private TagsPendente tagsPendentes;
         private Toggl toggl;
         private Jira jira;
-        private List<LogInfo> lErros;
+        public List<LogInfo> lErros;
         private UserDbContext userDbContext;
         public RunService()
         {
@@ -76,6 +76,8 @@ namespace HorasTogglJiraServico
                             break;
                         }
 
+                        List<LogInfo> lErrosUsu = new List<LogInfo>();
+
                         Environment.SetEnvironmentVariable("CLIENT_FOLDER", System.AppDomain.CurrentDomain.BaseDirectory);
 
                         // Setando a propridedade CLIENT_NAME com o nome do usuário que vai ser sincronizado. 
@@ -98,7 +100,7 @@ namespace HorasTogglJiraServico
                         }
                         else
                         {
-                            lErros.AddRange(retUserToggl.lErros);
+                            lErrosUsu.AddRange(retUserToggl.lErros);
                         }
 
                         string xIdTagsPendente = string.Empty;
@@ -110,7 +112,7 @@ namespace HorasTogglJiraServico
                         }
                         else
                         {
-                            lErros.AddRange(retWorkspaceTags.lErros);
+                            lErrosUsu.AddRange(retWorkspaceTags.lErros);
                         }
 
                         List<Datum> lDatum = new List<Datum>();
@@ -122,7 +124,7 @@ namespace HorasTogglJiraServico
                         }
                         else
                         {
-                            lErros.AddRange(retGetDetailedReport.lErros);
+                            lErrosUsu.AddRange(retGetDetailedReport.lErros);
                         }
 
                         List<InfoWorklog> toggls = new List<InfoWorklog>();
@@ -133,7 +135,7 @@ namespace HorasTogglJiraServico
                         }
                         else
                         {
-                            lErros.AddRange(retToggls.lErros);
+                            lErrosUsu.AddRange(retToggls.lErros);
                         }
 
                         message = $"Toggl - Foram encontrados {toggls.Count()} Registros de trabalho.";
@@ -181,7 +183,7 @@ namespace HorasTogglJiraServico
                                         else
                                         {
                                             retPutTimeStarted.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
-                                            lErros.AddRange(retPutTimeStarted.lErros);
+                                            lErrosUsu.AddRange(retPutTimeStarted.lErros);
 
                                             message = $"Jira - Tentando deletar o horário inserido.";
                                             log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
@@ -194,7 +196,7 @@ namespace HorasTogglJiraServico
                                             else
                                             {
                                                 retDeleteWorklog.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
-                                                lErros.AddRange(retDeleteWorklog.lErros);
+                                                lErrosUsu.AddRange(retDeleteWorklog.lErros);
                                             }
                                         }
                                     }
@@ -213,13 +215,13 @@ namespace HorasTogglJiraServico
                                     else
                                     {
                                         retPutTogglTags.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
-                                        lErros.AddRange(retPutTogglTags.lErros);
+                                        lErrosUsu.AddRange(retPutTogglTags.lErros);
                                     }
                                 }
                                 else
                                 {
                                     retPostJira.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
-                                    lErros.AddRange(retPostJira.lErros);
+                                    lErrosUsu.AddRange(retPostJira.lErros);
                                 }
 
                                 cont++;
@@ -230,22 +232,9 @@ namespace HorasTogglJiraServico
                         message = $"Fim da sincronização.";
                         log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Info);
 
-                        if (lErros.Count > 0)
+                        if (lErrosUsu.Count > 0)
                         {
-                            
-                            string caminhoArquivo = System.AppDomain.CurrentDomain.BaseDirectory;
-                            caminhoArquivo += $@"Logs\{Environment.GetEnvironmentVariable("CLIENT_NAME")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM-dd")}-Erros.log";
-                            FileStream fs = new FileStream(caminhoArquivo,
-                                FileMode.Append);
-                            StreamWriter sw = new StreamWriter(fs);
-                            foreach (var erro in lErros)
-                            {
-                                var strErro = $"{erro.dtLog.ToString("HH:mm:ss")} | ERROR | {erro.mensagem}";
-                                sw.WriteLine(strErro);
-                            }
-                            sw.Flush();
-                            sw.Close();
-                            fs.Close();
+                            log.EscreverArqLogErro(lErrosUsu);
                         }
                     }
                 }

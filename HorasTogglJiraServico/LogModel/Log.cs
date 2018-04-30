@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -173,6 +174,23 @@ namespace HorasTogglJiraServico.LogModel
             }
 
 
+        }
+
+        public void EscreverArqLogErro(List<LogInfo> lErros)
+        {
+            string caminhoArquivo = System.AppDomain.CurrentDomain.BaseDirectory;
+            caminhoArquivo += $@"Logs\{Environment.GetEnvironmentVariable("CLIENT_NAME")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM")}\{lErros.FirstOrDefault().dtLog.ToString("yyyy-MM-dd")}-Erros.log";
+            FileStream fs = new FileStream(caminhoArquivo,
+                FileMode.Append);
+            StreamWriter sw = new StreamWriter(fs);
+            foreach (var erro in lErros)
+            {
+                var strErro = $"{erro.dtLog.ToString("HH:mm:ss")} | ERROR | {erro.mensagem}";
+                sw.WriteLine(strErro);
+            }
+            sw.Flush();
+            sw.Close();
+            fs.Close();
         }
     }
 

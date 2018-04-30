@@ -25,7 +25,11 @@ namespace HorasTogglJiraServico.XmlModel
             log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
 
             var ret = LerArquivo(tipo: new TagsPendente(), nomeArq: @"\TagsPendente.xml");
-            ret.obj.Tag = ret.obj.Tag.ConvertAll(d => d.ToUpper());
+            if (!ret.bError)
+            {
+                ret.obj.Tag = ret.obj.Tag.ConvertAll(d => d.ToUpper());
+            }
+                       
             return ret;
         }
 
