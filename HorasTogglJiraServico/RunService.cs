@@ -200,28 +200,28 @@ namespace HorasTogglJiraServico
                                             }
                                         }
                                     }
-
-                                    message = $"Tentando retirar as tags pendentes do toggl referente.";
-                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
-
-                                    TogglPost togglPost = new TogglPost();
-                                    var retPutTogglTags = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
-                                    if (!retPutTogglTags.bError)
-                                    {
-                                        message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
-                                        log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
-                                        togglPost = retPutTogglTags.obj;
-                                    }
-                                    else
-                                    {
-                                        retPutTogglTags.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
-                                        lErrosUsu.AddRange(retPutTogglTags.lErros);
-                                    }
                                 }
                                 else
                                 {
                                     retPostJira.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                     lErrosUsu.AddRange(retPostJira.lErros);
+                                }
+
+                                message = $"Tentando retirar as tags pendentes do toggl referente.";
+                                log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
+
+                                TogglPost togglPost = new TogglPost();
+                                var retPutTogglTags = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
+                                if (!retPutTogglTags.bError)
+                                {
+                                    message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
+                                    togglPost = retPutTogglTags.obj;
+                                }
+                                else
+                                {
+                                    retPutTogglTags.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
+                                    lErrosUsu.AddRange(retPutTogglTags.lErros);
                                 }
 
                                 cont++;
