@@ -147,6 +147,8 @@ namespace HorasTogglJiraServico
                         {
                             foreach (var t in toggls)
                             {
+                                contError = 0;
+
                                 if (DateTime.Now >= dataFim)
                                 {
                                     message = $"A Sincronização foi finalizada porque atingiu o tempo limite.";
@@ -184,6 +186,7 @@ namespace HorasTogglJiraServico
                                         {
                                             retPutTimeStarted.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                             lErrosUsu.AddRange(retPutTimeStarted.lErros);
+                                            contError++;
 
                                             message = $"Jira - Tentando deletar o horário inserido.";
                                             log.InserirSalvarLog(message: message, arqLog: ArqLog.Principal, logLevel: LogLevel.Debug);
@@ -197,6 +200,7 @@ namespace HorasTogglJiraServico
                                             {
                                                 retDeleteWorklog.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                                 lErrosUsu.AddRange(retDeleteWorklog.lErros);
+                                                contError++;
                                             }
                                         }
                                     }
@@ -205,6 +209,7 @@ namespace HorasTogglJiraServico
                                 {
                                     retPostJira.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                     lErrosUsu.AddRange(retPostJira.lErros);
+                                    contError++;
                                 }
 
                                 message = $"Tentando retirar as tags pendentes do toggl referente.";
@@ -214,14 +219,19 @@ namespace HorasTogglJiraServico
                                 var retPutTogglTags = toggl.PutTogglTags(user: usu, infoWorklog: t, tagsPendentes: tagsPendentes);
                                 if (!retPutTogglTags.bError)
                                 {
-                                    message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
-                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
                                     togglPost = retPutTogglTags.obj;
                                 }
                                 else
                                 {
                                     retPutTogglTags.lErros.ForEach(x => x.mensagem = $"({cont}) {x.mensagem}");
                                     lErrosUsu.AddRange(retPutTogglTags.lErros);
+                                    contError++;
+                                }
+
+                                if(contError <= 0)
+                                {
+                                    message = $"({cont}) Jira - Inserindo Registro de trabalho: {t.key} - {t.comment} | {t.timeSpent} | {t.started} | {t.dtStarted} ";
+                                    log.InserirSalvarLog(message: message, arqLog: ArqLog.Sucesso, logLevel: LogLevel.Info);
                                 }
 
                                 cont++;
